@@ -26,8 +26,9 @@ A project to facilitate the use of Mountebank
 
 ### mocks/stubs
   - folder with all stubs packages that will be used
-  - every folder directly inside /stubs must have an index.js file that exports the stubs object
+  - every folder directly inside `/stubs` must have an `index.js` file that exports the stubs object
   - stubs object is as follow:
+<pre>
   {
   stubs: {
     [stubsName]: {
@@ -37,6 +38,7 @@ A project to facilitate the use of Mountebank
       },
     },
   }
+</pre>
   it is an object that has a stubs property that map each 'stubName' and its stub object, the stub object follow the contract of Mountebank: http://localhost:2525/docs/api/contracts?type=addStub
 
 ### mocks/stubs/index.js
@@ -59,12 +61,13 @@ A project to facilitate the use of Mountebank
 
 - Structure example:
 
-/my-sample-project  - project folder
-  /src - my sample project source code
-  /mocks -  main folder used by the mock-server project.
-  /gulpfile.js - File used by mock-server project
-  /package.json - Some configurations inside it are needed to start the mock-server project
-
+<pre>
+/my-sample-project    - project folder
+  /src                - my sample project source code
+  /mocks              -  main folder used by the mock-server project.
+  /gulpfile.js        - File used by mock-server project
+  /package.json       - Some configurations inside it are needed to start the mock-server project
+</pre>
 ## The current mock-server project
 
-- Inside /mocks/stubs there are some folders that can be discarded, they are there to be used as a sample;
+- Inside `/mocks/stubs` there are some folders that can be discarded, they are there to be used as a sample;
