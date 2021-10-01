@@ -1,0 +1,18 @@
+{
+  "Host": "localhost:8090",
+  "Connection": "keep-alive",
+  "Cache-Control": "max-age=0",
+  "sec-ch-ua": "\" Not A;Brand\";v=\"99\", \"Chromium\";v=\"90\", \"Google Chrome\";v=\"90\"",
+  "sec-ch-ua-mobile": "?0",
+  "Upgrade-Insecure-Requests": "1",
+  "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36",
+  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+  "Sec-Fetch-Site": "same-site",
+  "Sec-Fetch-Mode": "navigate",
+  "Sec-Fetch-User": "?1",
+  "Sec-Fetch-Dest": "document",
+  "Referer": "http://localhost:3000/",
+  "Accept-Encoding": "gzip, deflate, br",
+  "Accept-Language": "en-US,en;q=0.9",
+  "Cookie": "APP_SESSION_ID=ZjI5ZDE3MzMtYWVmOC00ZDhlLWE5N2ItMjFiYmJkZmVlNDU2"
+}

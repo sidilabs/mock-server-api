@@ -1,0 +1,15 @@
+{
+  "list": [
+    {
+      "id": 102,
+      "configId": 67,
+      "title": "resource test",
+      "description": "this is test resource",
+      "region": "USA",
+      "language": "eng",
+      "default": true,
+      "status": "A"
+    }
+  ],
+  "total": 1
+}

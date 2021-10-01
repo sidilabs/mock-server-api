@@ -1,0 +1,9 @@
+version: "3.7"
+services:
+  mountebank:
+    image: jkris/mountebank
+    hostname: sdcadmin_mountebank
+    ports:
+      - 2525:2525
+      - 8090:8090
+    command: --allowInjection
