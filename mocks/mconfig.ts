@@ -1,11 +1,12 @@
-const config = {
+export const config = {
   mountebankUrl: "http://localhost:2525",
   apiTimeout: 500,
   appUrl: "http://localhost:3000",
   stubsFolder: "./mocks/stubs",
+  memDB: "__db__",
 };
 
-const imposter = {
+export const imposter = {
   port: 8090,
   protocol: "http",
   name: "consent-admin",
@@ -21,9 +22,4 @@ const imposter = {
       "Mountebank-Id": "defaultResponse",
     },
   },
-};
-
-module.exports = {
-  config,
-  imposter,
 };

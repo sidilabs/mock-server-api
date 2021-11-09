@@ -1,12 +1,12 @@
-const axios = require("axios");
-const log = require("fancy-log");
+import axios from "axios";
+import log from "fancy-log";
+import { StubData } from "./@types";
 
-const {
-  config: { mountebankUrl },
-  imposter,
-} = require("./mconfig");
+import { config, imposter } from "./mconfig";
 
-const urlImposters = mountebankUrl + "/imposters";
+const urlImposters = config.mountebankUrl + "/imposters";
+
+import { stubsModule } from "./stubs";
 
 async function restartImposter() {
   try {
@@ -22,14 +22,14 @@ async function restartImposter() {
       data: imposter,
     });
     log("Imposter at " + imposter.port + " (re)started...");
-  } catch (error) {
+  } catch (error: any) {
     log(error.response);
     throw error;
   } finally {
   }
 }
 
-async function saveStub(stub, data) {
+async function saveStub(stub: string, data: StubData) {
   try {
     const response = await axios({
       method: "post",
@@ -39,7 +39,7 @@ async function saveStub(stub, data) {
     });
     const status = response.status;
     if (status >= 200 && status < 300) {
-      log(`Stubbed: ${stub}`);
+      log(`Stub: ${stub}`);
     } else {
       log.error(`Error stubbing data: ${stub}`, response);
     }
@@ -49,20 +49,16 @@ async function saveStub(stub, data) {
 }
 
 const createStubs = async () => {
-  const stubsPackages = require("./stubs");
-
-  for (const spNames in stubsPackages) {
-    const stubs = stubsPackages[spNames];
-    for (const sNames in stubs) {
-      const stubData = stubs[sNames];
+  for (const spNames in stubsModule) {
+    const stubsCollection = stubsModule[spNames];
+    for (const sNames in stubsCollection) {
+      const stubData = stubsCollection[sNames];
       await saveStub(`${spNames}:${sNames}`, stubData);
     }
   }
 };
 
-const init = async () => {
+export const init = async () => {
   await restartImposter();
   await createStubs();
 };
-
-module.exports = { init };
