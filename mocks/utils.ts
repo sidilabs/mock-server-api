@@ -7,9 +7,11 @@ import {
   Response,
   Stub,
   ConfigInjection,
+  StubsModule,
 } from "./@types";
 
 import log from "fancy-log";
+import { ImposterDefaults, MConfig } from "./mconfig";
 
 const responseExtendBehavior = (
   response: Response,
@@ -92,4 +94,32 @@ const packageBaseURL = (url: string, packageStubs: StubCollection) => {
   return packageStubs;
 };
 
-export { responseExtendBehavior, stubExtendBehavior, packageExtendBehavior, packageBaseURL };
+const extendModuleBehavior = (stubsModule: StubsModule, config: MConfig, imposter: ImposterDefaults) => {
+  let headers: { [key: string]: string | boolean | number } = { ...imposter.defaultResponse.headers };
+  delete headers["Mountebank-Id"];
+  let strHeaders = JSON.stringify(headers);
+
+  const decorate = ((config: ConfigInjection) => {
+    config.response.statusCode = config.response.statusCode || 200;
+    const headers = config.response.headers || {};
+    let a = Math.floor(Math.random() * 10);
+    let b = Math.floor(Math.random() * 10);
+    let c = Math.floor(Math.random() * 10);
+    const defaultHeaders: any = "#####";
+    config.response.headers = {
+      ...headers,
+      ...defaultHeaders,
+      _csrf: `${a}${b}${c}a001e-1c45-4c33-853f-643f9bbb0bad`,
+    };
+  })
+    .toString()
+    .replace("'#####'", strHeaders);
+
+  for (const name in stubsModule) {
+    const packageStubs: StubCollection = stubsModule[name];
+    packageExtendBehavior(packageStubs, decorate, { wait: config.apiTimeout }, name);
+  }
+  return stubsModule;
+};
+
+export { responseExtendBehavior, stubExtendBehavior, packageExtendBehavior, packageBaseURL, extendModuleBehavior };

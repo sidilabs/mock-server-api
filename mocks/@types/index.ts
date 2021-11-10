@@ -23,7 +23,7 @@ export type ConfigInjection = {
 };
 export type FunctionString = string;
 export type RegExpString = string;
-export type HttpMethod = "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "DELETE";
+export type HttpMethod = "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "DELETE" | "PATCH";
 
 export type Primitive = string | number | boolean;
 export type Json = { [key: string]: Primitive | Primitive[] | Json | Json[] };
@@ -74,10 +74,17 @@ export type StubsModule = {
 
 export type ApiData = {
   state: string;
-  path: string;
-  iniData: any[];
+  api: RegExpString;
+  data: any[];
+  model: string;
 };
 
 export type ApiCollection = {
   [key: string]: ApiData;
+};
+
+export type ApiStub = {
+  baseUrl?: string;
+  apis?: ApiCollection;
+  stubs?: StubCollection;
 };

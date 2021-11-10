@@ -4,9 +4,11 @@ import { StubData } from "./@types";
 
 import { config, imposter } from "./mconfig";
 
-const urlImposters = config.mountebankUrl + "/imposters";
+const urlImposters = config.mountebankUrl + ":" + config.mountebankPort + "/imposters";
 
-import { stubsModule } from "./stubs";
+const urlMockedApi = config.mountebankUrl + ":" + imposter.port;
+
+import { stubsModule, initialApisData } from "./stubs";
 
 async function restartImposter() {
   try {
@@ -48,6 +50,25 @@ async function saveStub(stub: string, data: StubData) {
   }
 }
 
+async function loadApiData(api: string, data: any[]) {
+  try {
+    const response = await axios({
+      method: "patch",
+      url: urlMockedApi + api,
+      timeout: 1000,
+      data,
+    });
+    const status = response.status;
+    if (status >= 200 && status < 300) {
+      log(`Loaded api: ${api}`);
+    } else {
+      log.error(`Error loading data: ${api}`, response);
+    }
+  } catch (e) {
+    log.error(`Error loading data: ${api}`, e);
+  }
+}
+
 const createStubs = async () => {
   for (const spNames in stubsModule) {
     const stubsCollection = stubsModule[spNames];
@@ -58,7 +79,15 @@ const createStubs = async () => {
   }
 };
 
+const initializeApiData = async () => {
+  for (var index in initialApisData) {
+    const apiData = initialApisData[index];
+    await loadApiData(apiData.api, apiData.data);
+  }
+};
+
 export const init = async () => {
   await restartImposter();
   await createStubs();
+  await initializeApiData();
 };
