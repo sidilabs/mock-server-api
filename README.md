@@ -21,16 +21,15 @@ A project to facilitate the use of Mountebank
 ### gulpfile.js
   - used to run the tasks to configure the mock api
 
-### mocks/mconfig.js
+### mocks/mconfig.ts
   - configuration file with required values
 
 ### mocks/stubs
   - folder with all stubs packages that will be used
-  - every folder directly inside `/stubs` must have an `index.js` file that exports the stubs object
-  - stubs object is as follow:
+  - every folder directly inside `/stubs` must have an `index.ts` file that exports the stubs object
+  - the export stubs object is as follow:
 <pre>
-  {
-  stubs: {
+  export const stubs = {
     [stubsName]: {
       stub: {
         predicates: ...,
@@ -41,10 +40,10 @@ A project to facilitate the use of Mountebank
 </pre>
   it is an object that has a stubs property that map each 'stubName' and its stub object, the stub object follow the contract of Mountebank: http://localhost:2525/docs/api/contracts?type=addStub
 
-### mocks/stubs/index.js
+### mocks/stubs/index.ts
   - file that load and configure all stubs packages
 
-### mocks/index.js
+### mocks/index.ts
   - file responsible to communicate with the Mountebank and configure the mock server
 
 ## Run steps
@@ -65,8 +64,9 @@ A project to facilitate the use of Mountebank
 /my-sample-project    - project folder
   /src                - my sample project source code
   /mocks              -  main folder used by the mock-server project.
-  /gulpfile.js        - File used by mock-server project
+  /gulpfile.ts        - File used by mock-server project
   /package.json       - Some configurations inside it are needed to start the mock-server project
+  /tsconfig.json      - Some configuration to run correctly with Typescript
 </pre>
 ## The current mock-server project
 
