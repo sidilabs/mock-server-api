@@ -37,7 +37,7 @@ export const imposter: ImposterDefaults = {
     headers: {
       "Access-Control-Allow-Origin": config.appUrl,
       "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
-      "Access-Control-Allow-Headers": "_csrf",
+      "Access-Control-Allow-Headers": "_csrf, Content-Type",
       "Access-Control-Expose-Headers": "_csrf",
       "Access-Control-Allow-Credentials": true,
       "Access-Control-Max-Age": 1800,

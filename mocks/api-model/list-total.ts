@@ -69,6 +69,41 @@ export function initStubs(name: string, configApi: ApiData, db: string): StubsMo
     };
   }
 
+  function injectPut(config: ConfigInjection) {
+    const stateEntity = {
+      "###state###": {
+        type: "list-total",
+        api: "###api###",
+        lastId: 0,
+        data: [],
+      },
+    };
+    if (!config.state["###db###"]) {
+      config.state["###db###"] = stateEntity;
+    } else if (!config.state["###db###"]["###state###"]) {
+      config.state["###db###"] = { ...config.state["###db###"], ...stateEntity };
+    }
+    const dbEntity = config.state["###db###"]["###state###"];
+
+    const id = config.request.path.replace(new RegExp("^###api###/"), "");
+
+    const index: number = dbEntity.data.findIndex((entity: any) => entity.id == id);
+    let result: any;
+    if (dbEntity.data[index]) {
+      const entity = dbEntity.data[index];
+      result = { ...entity, ...JSON.parse(config.request.body) };
+      dbEntity.data[index] = result;
+    }
+
+    return {
+      statusCode: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(result),
+    };
+  }
+
   function injectDelete(config: ConfigInjection) {
     const stateEntity = {
       "###state###": {
@@ -159,20 +194,20 @@ export function initStubs(name: string, configApi: ApiData, db: string): StubsMo
     },
     getAll: {
       stub: {
-        predicates: [{ equals: { method: "GET", path: configApi.api } }],
+        predicates: [{ matches: { method: "GET", path: configApi.api } }],
         responses: [{ inject: fillData(injectGetAll.toString(), relation) }],
       },
     },
     post: {
       stub: {
-        predicates: [{ equals: { method: "POST", path: configApi.api } }],
+        predicates: [{ matches: { method: "POST", path: configApi.api } }],
         responses: [{ inject: fillData(injectPost.toString(), relation) }],
       },
     },
     put: {
       stub: {
-        predicates: [{ equals: { method: "PUT", path: configApi.api + "/\\d+" } }],
-        responses: [{ inject: fillData(injectPost.toString(), relation) }],
+        predicates: [{ matches: { method: "PUT", path: configApi.api + "/\\d+" } }],
+        responses: [{ inject: fillData(injectPut.toString(), relation) }],
       },
     },
     delete: {
@@ -183,7 +218,7 @@ export function initStubs(name: string, configApi: ApiData, db: string): StubsMo
     },
     patch: {
       stub: {
-        predicates: [{ equals: { method: "PATCH", path: configApi.api } }],
+        predicates: [{ matches: { method: "PATCH", path: configApi.api } }],
         responses: [{ inject: fillData(injectPatch.toString(), relation) }],
       },
     },
