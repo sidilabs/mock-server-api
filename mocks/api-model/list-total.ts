@@ -1,11 +1,11 @@
 import logger from "fancy-log";
 import { ApiData, ApiStub, ConfigInjection, StubCollection, StubsModule } from "../@types";
 
-function fillData(funcionStr: string, relation: { [key: string]: string }) {
+function fillData(functionStr: string, relation: { [key: string]: string }) {
   Object.keys(relation).forEach((key) => {
-    funcionStr = funcionStr.replace(new RegExp(key, "g"), relation[key]);
+    functionStr = functionStr.replace(new RegExp(key, "g"), relation[key]);
   });
-  return funcionStr;
+  return functionStr;
 }
 
 export function initStubs(name: string, configApi: ApiData, db: string): StubsModule {
