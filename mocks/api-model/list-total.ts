@@ -188,37 +188,37 @@ export function initStubs(name: string, configApi: ApiData, db: string): StubsMo
   const stubs: StubCollection = {
     get: {
       stub: {
-        predicates: [{ matches: { method: "GET", path: configApi.api + "/\\d+" } }],
+        predicates: [{ matches: { method: "GET", path: configApi.api + "/\\d+$" } }],
         responses: [{ inject: fillData(injectGet.toString(), relation) }],
       },
     },
     getAll: {
       stub: {
-        predicates: [{ matches: { method: "GET", path: configApi.api } }],
+        predicates: [{ matches: { method: "GET", path: configApi.api + "([?#].+)?$" } }],
         responses: [{ inject: fillData(injectGetAll.toString(), relation) }],
       },
     },
     post: {
       stub: {
-        predicates: [{ matches: { method: "POST", path: configApi.api } }],
+        predicates: [{ matches: { method: "POST", path: configApi.api + "$" } }],
         responses: [{ inject: fillData(injectPost.toString(), relation) }],
       },
     },
     put: {
       stub: {
-        predicates: [{ matches: { method: "PUT", path: configApi.api + "/\\d+" } }],
+        predicates: [{ matches: { method: "PUT", path: configApi.api + "/\\d+$" } }],
         responses: [{ inject: fillData(injectPut.toString(), relation) }],
       },
     },
     delete: {
       stub: {
-        predicates: [{ matches: { method: "DELETE", path: configApi.api + "/\\d+" } }],
+        predicates: [{ matches: { method: "DELETE", path: configApi.api + "/\\d+$" } }],
         responses: [{ inject: fillData(injectDelete.toString(), relation) }],
       },
     },
     patch: {
       stub: {
-        predicates: [{ matches: { method: "PATCH", path: configApi.api } }],
+        predicates: [{ matches: { method: "PATCH", path: configApi.api + "$" } }],
         responses: [{ inject: fillData(injectPatch.toString(), relation) }],
       },
     },
