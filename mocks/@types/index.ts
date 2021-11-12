@@ -75,7 +75,7 @@ export type StubsModule = {
 export type ApiData = {
   state: string;
   api: RegExpString;
-  data: any[];
+  data?: any[];
   model: string;
 };
 
