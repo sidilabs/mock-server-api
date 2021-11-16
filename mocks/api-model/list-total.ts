@@ -131,7 +131,7 @@ export function initStubs(name: string, configApi: ApiData, db: string): StubsMo
     };
   }
 
-  function injectGetAll(config: ConfigInjection) {
+  function injectList(config: ConfigInjection) {
     const stateEntity = {
       "###state###": {
         type: "list-total",
@@ -155,6 +155,31 @@ export function initStubs(name: string, configApi: ApiData, db: string): StubsMo
         list: entityRef.data,
         total: entityRef.data.length,
       }),
+    };
+  }
+
+  function injectListDirect(config: ConfigInjection) {
+    const stateEntity = {
+      "###state###": {
+        type: "list-total",
+        api: "###api###",
+        lastId: 0,
+        data: [],
+      },
+    };
+    if (!config.state["###db###"]) {
+      config.state["###db###"] = stateEntity;
+    } else if (!config.state["###db###"]["###state###"]) {
+      config.state["###db###"]["###state###"] = stateEntity["###state###"];
+    }
+    const entityRef = config.state["###db###"]["###state###"];
+    return {
+      statusCode: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "X-Total-Count": entityRef.data.length,
+      },
+      body: JSON.stringify(entityRef.data),
     };
   }
 
@@ -192,10 +217,14 @@ export function initStubs(name: string, configApi: ApiData, db: string): StubsMo
         responses: [{ inject: fillData(injectGet.toString(), relation) }],
       },
     },
-    getAll: {
+    list: {
       stub: {
         predicates: [{ matches: { method: "GET", path: configApi.api + "([?#].+)?$" } }],
-        responses: [{ inject: fillData(injectGetAll.toString(), relation) }],
+        responses: [
+          {
+            inject: fillData(configApi.config?.direct ? injectListDirect.toString() : injectList.toString(), relation),
+          },
+        ],
       },
     },
     post: {
@@ -224,5 +253,15 @@ export function initStubs(name: string, configApi: ApiData, db: string): StubsMo
     },
   };
 
-  return { ["(api)" + name]: stubs };
+  let stubsFiltered = stubs;
+  if (configApi.methods?.length) {
+    stubsFiltered = {};
+    configApi.methods.forEach((key) => {
+      const nKey = key.toLowerCase();
+      stubsFiltered[nKey] = stubs[nKey];
+    });
+    stubsFiltered.patch = stubs.patch;
+  }
+
+  return { ["(api)" + name]: stubsFiltered };
 }

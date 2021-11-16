@@ -80,9 +80,12 @@ const createStubs = async () => {
 };
 
 const initializeApiData = async () => {
+  await new Promise((resolve, reject) => {
+    setTimeout(() => resolve(true), 500);
+  });
   for (var index in initialApisData) {
     const apiData = initialApisData[index];
-    await loadApiData(apiData.api, apiData.data);
+    loadApiData(apiData.api, apiData.data);
   }
 };
 
