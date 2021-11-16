@@ -72,11 +72,15 @@ export type StubsModule = {
   [key: string]: StubCollection;
 };
 
+export type ApiMethods = "LIST" | "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+
 export type ApiData = {
   state: string;
   api: RegExpString;
   data?: any[];
   model: string;
+  methods?: ApiMethods[];
+  config?: any;
 };
 
 export type ApiCollection = {
