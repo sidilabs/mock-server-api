@@ -1,17 +1,17 @@
 import logger from "fancy-log";
 import { ApiData, ApiStub, ConfigInjection, StubCollection, StubsModule } from "../@types";
 
-function fillData(funcionStr: string, relation: { [key: string]: string }) {
+function fillData(functionStr: string, relation: { [key: string]: string }) {
   Object.keys(relation).forEach((key) => {
-    funcionStr = funcionStr.replace(new RegExp(key, "g"), relation[key]);
+    functionStr = functionStr.replace(new RegExp(key, "g"), relation[key]);
   });
-  return funcionStr;
+  return functionStr;
 }
 
 export function initStubs(name: string, configApi: ApiData, db: string): StubsModule {
   const relation = {
     "###db###": db,
-    "###state###": `${name}:${configApi.state}`,
+    "###state###": `${configApi.state}`,
     "###api###": configApi.api,
   };
 
@@ -27,7 +27,7 @@ export function initStubs(name: string, configApi: ApiData, db: string): StubsMo
     if (!config.state["###db###"]) {
       config.state["###db###"] = stateEntity;
     } else if (!config.state["###db###"]["###state###"]) {
-      config.state["###db###"] = { ...config.state["###db###"], ...stateEntity };
+      config.state["###db###"]["###state###"] = stateEntity["###state###"];
     }
     const dbEntity = config.state["###db###"]["###state###"];
 
@@ -54,7 +54,7 @@ export function initStubs(name: string, configApi: ApiData, db: string): StubsMo
     if (!config.state["###db###"]) {
       config.state["###db###"] = stateEntity;
     } else if (!config.state["###db###"]["###state###"]) {
-      config.state["###db###"] = { ...config.state["###db###"], ...stateEntity };
+      config.state["###db###"]["###state###"] = stateEntity["###state###"];
     }
     const dbEntity = config.state["###db###"]["###state###"];
     dbEntity.lastId++;
@@ -81,7 +81,7 @@ export function initStubs(name: string, configApi: ApiData, db: string): StubsMo
     if (!config.state["###db###"]) {
       config.state["###db###"] = stateEntity;
     } else if (!config.state["###db###"]["###state###"]) {
-      config.state["###db###"] = { ...config.state["###db###"], ...stateEntity };
+      config.state["###db###"]["###state###"] = stateEntity["###state###"];
     }
     const dbEntity = config.state["###db###"]["###state###"];
 
@@ -116,7 +116,7 @@ export function initStubs(name: string, configApi: ApiData, db: string): StubsMo
     if (!config.state["###db###"]) {
       config.state["###db###"] = stateEntity;
     } else if (!config.state["###db###"]["###state###"]) {
-      config.state["###db###"] = { ...config.state["###db###"], ...stateEntity };
+      config.state["###db###"]["###state###"] = stateEntity["###state###"];
     }
     const dbEntity = config.state["###db###"]["###state###"];
     const id = config.request.path.replace(new RegExp("###api###"), "");
@@ -143,7 +143,7 @@ export function initStubs(name: string, configApi: ApiData, db: string): StubsMo
     if (!config.state["###db###"]) {
       config.state["###db###"] = stateEntity;
     } else if (!config.state["###db###"]["###state###"]) {
-      config.state["###db###"] = { ...config.state["###db###"], ...stateEntity };
+      config.state["###db###"]["###state###"] = stateEntity["###state###"];
     }
     const entityRef = config.state["###db###"]["###state###"];
     return {
@@ -170,7 +170,7 @@ export function initStubs(name: string, configApi: ApiData, db: string): StubsMo
     if (!config.state["###db###"]) {
       config.state["###db###"] = stateEntity;
     } else if (!config.state["###db###"]["###state###"]) {
-      config.state["###db###"] = { ...config.state["###db###"], ...stateEntity };
+      config.state["###db###"]["###state###"] = stateEntity["###state###"];
     }
     const dbEntity = config.state["###db###"]["###state###"];
     const stateData: any[] = JSON.parse(config.request.body);

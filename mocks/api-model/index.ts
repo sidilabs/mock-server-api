@@ -19,7 +19,6 @@ export function initApi(packName: string, apiCollection: ApiCollection) {
   Object.keys(apiCollection).forEach((key) => {
     const apiData = apiCollection[key];
     const initStubs = models[apiData.model];
-    logger(initStubs);
     stubsModule = { ...stubsModule, ...initStubs(`${packName ? packName + "/" : ""}${key}`, apiData, config.memDB) };
   });
   return stubsModule;
