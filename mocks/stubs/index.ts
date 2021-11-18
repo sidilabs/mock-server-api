@@ -7,8 +7,7 @@ import { ApiStub, StubCollection, StubsModule } from "../@types";
 
 import { initApi } from "../api-model";
 
-import { cors } from "./cors";
-import log from "fancy-log";
+import { options } from "./cors";
 
 const loadStubs = () => {
   const directory = config.stubsFolder;
@@ -44,7 +43,7 @@ const loadApis = () => {
 };
 
 export const stubsModule: StubsModule = {
-  ...extendModuleBehavior({ ...loadApis(), ...loadStubs(), cors: { cors } }, config, imposter),
+  ...extendModuleBehavior({ ...loadApis(), ...loadStubs(), cors: { options } }, config, imposter),
 };
 
 const loadApiData = () => {
@@ -53,6 +52,7 @@ const loadApiData = () => {
     .readdirSync(directory)
     .filter((file: string) => fs.lstatSync(path.resolve(directory, file)).isDirectory());
   let apisData: { api: string; data: any[] }[] = [];
+  let priorities: { [key: string]: any[] } = { 1: [] };
   dirs.forEach((dirName: string) => {
     const apiStubMock: ApiStub = require("./" + dirName);
     if (!apiStubMock.apis) return;
@@ -60,9 +60,17 @@ const loadApiData = () => {
       if (!apiStubMock.apis) return;
       const apiConfig = apiStubMock.apis[key];
       if (apiConfig.data) {
-        apisData.push({ api: apiConfig.api, data: apiConfig.data });
+        if (apiConfig.dataPriority) {
+          priorities[apiConfig.dataPriority] = priorities[apiConfig.dataPriority] || [];
+          priorities[apiConfig.dataPriority].push({ api: apiConfig.api, data: apiConfig.data });
+        } else {
+          priorities[1].push({ api: apiConfig.api, data: apiConfig.data });
+        }
       }
     });
+  });
+  Object.keys(priorities).forEach((key) => {
+    apisData = [...apisData, ...priorities[key]];
   });
   return apisData;
 };

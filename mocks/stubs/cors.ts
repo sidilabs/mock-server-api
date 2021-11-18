@@ -1,6 +1,6 @@
 import { StubData } from "../@types";
 
-export const cors: StubData = {
+export const options: StubData = {
   stub: {
     predicates: [
       {

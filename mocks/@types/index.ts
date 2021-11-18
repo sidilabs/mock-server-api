@@ -15,10 +15,10 @@ export type ConfigInjection = {
   };
   state: { [key: string]: any };
   logger: {
-    debug: (val: string) => void;
-    info: (val: string) => void;
-    warn: (val: string) => void;
-    error: (val: string) => void;
+    debug: (val: any, ...args: any[]) => void;
+    info: (val: any, ...args: any[]) => void;
+    warn: (val: any, ...args: any[]) => void;
+    error: (val: any, ...args: any[]) => void;
   };
 };
 export type FunctionString = string;
@@ -75,11 +75,11 @@ export type StubsModule = {
 export type ApiMethods = "LIST" | "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
 export type ApiData<T> = {
+  model: string;
   state: string;
   api: RegExpString;
   data?: any[];
   dataPriority?: number;
-  model: string;
   methods?: ApiMethods[];
   config?: T;
 };
