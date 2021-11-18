@@ -11,19 +11,44 @@ function parseParams(url: string) {
   return url.replace(/:[^\/#?]+/, "([^\\/#?]+)");
 }
 
+export type FieldGenerator = {
+  methods?: string[];
+  callback: (response: any, config: ConfigInjection) => any;
+};
+
+export type FieldGeneratorMap = {
+  [key: string]: FieldGenerator;
+};
+
 export type ConfigList = {
   direct?: boolean;
+  fields?: FieldGeneratorMap;
 };
 
 export function initStubs(name: string, configApi: ApiData<ConfigList>, db: string): StubsModule {
+  let jsonFields: any = "";
+  if (configApi.config?.fields) {
+    const fields = configApi.config?.fields || {};
+    jsonFields = Object.keys(fields).reduce((acc, fieldName: string) => {
+      const generator = fields[fieldName];
+      acc = {
+        ...acc,
+        [fieldName]: { ...generator, callback: generator.callback.toString() },
+      };
+      return acc;
+    }, {});
+  }
+
   const relation = {
     "###db###": db,
     "###state###": `${configApi.state}`,
     "###api###": configApi.api,
     "###direct###": JSON.stringify(!!configApi.config?.direct),
+    "'###fields###'": JSON.stringify(jsonFields),
   };
 
   function injectGet(config: ConfigInjection) {
+    config.logger.warn("config.request", JSON.stringify(config.request));
     const stateDefinition = {
       "###state###": {
         lastId: 0,
@@ -40,12 +65,30 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
 
     const id = config.request.path.replace(new RegExp("^###api###/"), "");
 
+    let objResponse = state.data.find((entity: any) => entity.id == id);
+    let fields: any = "###fields###"; /*FieldGeneratorMap*/
+    if (fields) {
+      fields = Object.keys(fields).reduce((acc, fieldName) => {
+        let fieldGenerator: FieldGenerator = fields[fieldName];
+        if (!fieldGenerator.methods || fieldGenerator.methods.includes("GET")) {
+          return { ...acc, [fieldName]: { ...fieldGenerator, callback: eval(`(${fieldGenerator.callback})`) } };
+        } else {
+          return acc;
+        }
+      }, {});
+
+      Object.keys(fields).forEach((fieldName) => {
+        const generator = fields[fieldName].callback;
+        objResponse = { ...objResponse, [fieldName]: generator(objResponse, config) };
+      });
+    }
+
     return {
       statusCode: 200,
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(state.data.find((entity: any) => entity.id == id)),
+      body: JSON.stringify(objResponse),
     };
   }
 
@@ -63,7 +106,25 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
     }
     const state = config.state["###db###"]["###state###"];
     state.lastId++;
-    const result = { id: state.lastId, ...JSON.parse(config.request.body) };
+    let result = { id: state.lastId, ...JSON.parse(config.request.body) };
+
+    let fields: any = "###fields###"; /*FieldGeneratorMap*/
+    if (fields) {
+      fields = Object.keys(fields).reduce((acc, fieldName) => {
+        let fieldGenerator: FieldGenerator = fields[fieldName];
+        if (!fieldGenerator.methods || fieldGenerator.methods.includes("POST")) {
+          return { ...acc, [fieldName]: { ...fieldGenerator, callback: eval(`(${fieldGenerator.callback})`) } };
+        } else {
+          return acc;
+        }
+      }, {});
+
+      Object.keys(fields).forEach((fieldName) => {
+        const generator = fields[fieldName].callback;
+        result = { ...result, [fieldName]: generator(result, config) };
+      });
+    }
+
     state.data.push(result);
     return {
       headers: {
@@ -95,6 +156,24 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
     if (state.data[index]) {
       const entity = state.data[index];
       result = { ...entity, ...JSON.parse(config.request.body) };
+
+      let fields: any = "###fields###"; /*FieldGeneratorMap*/
+      if (fields) {
+        fields = Object.keys(fields).reduce((acc, fieldName) => {
+          let fieldGenerator: FieldGenerator = fields[fieldName];
+          if (!fieldGenerator.methods || fieldGenerator.methods.includes("PUT")) {
+            return { ...acc, [fieldName]: { ...fieldGenerator, callback: eval(`(${fieldGenerator.callback})`) } };
+          } else {
+            return acc;
+          }
+        }, {});
+
+        Object.keys(fields).forEach((fieldName) => {
+          const generator = fields[fieldName].callback;
+          result = { ...result, [fieldName]: generator(result, config) };
+        });
+      }
+
       state.data[index] = result;
     }
 
@@ -132,7 +211,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
     };
   }
 
-  function injectList(config: ConfigInjection) {
+  function injectList(config: ConfigInjection, injectState: any, logger: any, resolve: any, imposterState: any) {
     const isDirect = JSON.parse("###direct###");
     const stateDefinition = {
       "###state###": {
@@ -161,7 +240,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
       config.state["###db###"]["###state###"] = stateDefinition["###state###"];
     }
     const entityRef = config.state["###db###"]["###state###"];
-    let list = entityRef.data;
+    let list: any[] = entityRef.data;
     if (Object.keys(paramValues).length) {
       list = list.filter((item: any) => {
         let isOk = true;
@@ -172,6 +251,26 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
           }
         });
         return isOk;
+      });
+    }
+
+    let fields: any = "###fields###"; /*FieldGeneratorMap*/
+    if (list.length && fields) {
+      fields = Object.keys(fields).reduce((acc, fieldName) => {
+        let fieldGenerator: FieldGenerator = fields[fieldName];
+        if (!fieldGenerator.methods || fieldGenerator.methods.includes("LIST")) {
+          return { ...acc, [fieldName]: { ...fieldGenerator, callback: eval(`(${fieldGenerator.callback})`) } };
+        } else {
+          return acc;
+        }
+      }, {});
+      list = list.map((item) => {
+        let result = { ...item };
+        Object.keys(fields).forEach((fieldName) => {
+          const generator = fields[fieldName].callback;
+          result = { ...result, [fieldName]: generator(result, config) };
+        });
+        return result;
       });
     }
 
