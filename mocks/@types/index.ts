@@ -47,7 +47,7 @@ export type Response = {
   is?: {
     statusCode?: number;
     headers?: {
-      [key: string]: string | number;
+      [key: string]: string | number | boolean;
     };
     body?: Primitive | Json;
   };
@@ -74,17 +74,18 @@ export type StubsModule = {
 
 export type ApiMethods = "LIST" | "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
-export type ApiData = {
+export type ApiData<T> = {
   state: string;
   api: RegExpString;
   data?: any[];
+  dataPriority?: number;
   model: string;
   methods?: ApiMethods[];
-  config?: any;
+  config?: T;
 };
 
 export type ApiCollection = {
-  [key: string]: ApiData;
+  [key: string]: ApiData<any>;
 };
 
 export type ApiStub = {
