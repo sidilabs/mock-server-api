@@ -1,10 +1,10 @@
 import { ApiCollection, ApiData, ApiStub, StubsModule } from "../@types";
 import * as listTotal from "./list-total";
+import * as internalList from "./internal-list";
 
 import { config, imposter } from "../mconfig";
-import logger from "fancy-log";
 
-type InitStubs = (name: string, configApi: ApiData, db: string) => StubsModule;
+type InitStubs = (name: string, configApi: ApiData<any>, db: string) => StubsModule;
 
 type Models = {
   [key: string]: InitStubs;
@@ -12,6 +12,7 @@ type Models = {
 
 export const models: Models = {
   "list-total": listTotal.initStubs,
+  "internal-list": internalList.initStubs,
 };
 
 export function initApi(packName: string, apiCollection: ApiCollection) {
