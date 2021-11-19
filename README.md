@@ -46,17 +46,28 @@ A project to facilitate the use of Mountebank
 ### mocks/index.ts
   - file responsible to communicate with the Mountebank and configure the mock server
 
-## Required configurations
+## Required configurations 
 
-- Docker & Docker Compose to be installed
+- Docker & Docker Compose to be installed **(Docker)**
+
+-  On the command line inside the base folder of the repository, run: `npm i` to install everything
   
-## Run steps
+## Run steps using 
 
-- Inside the mocks folder: `docker-compose up -d`
+**(Docker)**
+- Inside the mocks folder run: `docker-compose up -d`
+
+**(Non Docker)**
+- On the command line run: `npm run mb`
+
+- On an new command line run: `npm run mock`
 
 - After that: `npm run mocks` to run the task to configure the mock server
 
   - Every time that its necessary to update the mock server it is just this command again.
+
+
+## Run steps using (Docker only)
 
 ## Integrating with another project:
 
