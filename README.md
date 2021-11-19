@@ -46,6 +46,10 @@ A project to facilitate the use of Mountebank
 ### mocks/index.ts
   - file responsible to communicate with the Mountebank and configure the mock server
 
+## Required configurations
+
+- Docker & Docker Compose to be installed
+  
 ## Run steps
 
 - Inside the mocks folder: `docker-compose up -d`
@@ -71,3 +75,5 @@ A project to facilitate the use of Mountebank
 ## The current mock-server project
 
 - Inside `/mocks/stubs` there are some folders that can be discarded, they are there to be used as a sample;
+
+- The folder `/mocks/stubs/projects` use the api generation with urlParams and generated fields
