@@ -78,6 +78,7 @@ export type ApiData<T> = {
   model: string;
   state: string;
   api: RegExpString;
+  dataApi?: string;
   data?: any[];
   dataPriority?: number;
   methods?: ApiMethods[];

@@ -1,35 +1,52 @@
 const projectList = require("./projectList.json");
 const project = require("./project.json");
+const projectModuleList = require("./projectModuleList.json");
 
 import { packageBaseURL } from "../../utils";
 import { ADMIN } from "../../constants";
-import { StubCollection } from "../../@types";
+import { ApiCollection, StubCollection } from "../../@types";
+import { ConfigList } from "../../api-model/list-total";
 
-export const stubs: StubCollection = packageBaseURL(ADMIN, {
-  projectList: {
-    stub: {
-      predicates: [{ equals: { method: "GET", path: "/project" } }],
-      responses: [{ is: { body: projectList } }],
-    },
-  },
+export const apis: ApiCollection = {
   project: {
-    stub: {
-      predicates: [{ matches: { method: "GET", path: "/project/\\d+" } }],
-      responses: [{ is: { body: project } }],
-    },
-  },
-  projectSubmit: {
-    stub: {
-      predicates: [
-        {
-          or: [
-            { matches: { method: "POST", path: "/project" } },
-            { matches: { method: "PUT", path: "/project/\\d+" } },
-            { matches: { method: "DELETE", path: "/project/\\d+" } },
-          ],
+    model: "list-total",
+    api: "/project",
+    state: "project",
+    data: projectList.list,
+    config: {
+      fields: {
+        created: {
+          methods: ["POST"],
+          callback: () => new Date().getTime() / 1000,
         },
-      ],
-      responses: [{ is: { statusCode: 200 } }],
-    },
+        updated: {
+          methods: ["PUT"],
+          callback: () => new Date().getTime() / 1000,
+        },
+      },
+    } as ConfigList,
   },
-});
+  projectModule: {
+    model: "list-total",
+    api: "/project/:projectId/module",
+    dataApi: "/project/module",
+    data: projectModuleList,
+
+    state: "projectModule",
+    config: {
+      urlParams: {
+        ":projectId": ["LIST"],
+      },
+      fields: {
+        created: {
+          methods: ["POST"],
+          callback: () => new Date().getTime() / 1000,
+        },
+        updated: {
+          methods: ["PUT"],
+          callback: () => new Date().getTime() / 1000,
+        },
+      },
+    } as ConfigList,
+  },
+};

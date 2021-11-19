@@ -31,7 +31,7 @@ export type ImposterDefaults = {
 export const imposter: ImposterDefaults = {
   port: 8090,
   protocol: "http",
-  name: "consent-admin",
+  name: "project-sample",
   defaultResponse: {
     statusCode: 418,
     headers: {

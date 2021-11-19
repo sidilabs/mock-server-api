@@ -62,9 +62,9 @@ const loadApiData = () => {
       if (apiConfig.data) {
         if (apiConfig.dataPriority) {
           priorities[apiConfig.dataPriority] = priorities[apiConfig.dataPriority] || [];
-          priorities[apiConfig.dataPriority].push({ api: apiConfig.api, data: apiConfig.data });
+          priorities[apiConfig.dataPriority].push({ api: apiConfig.dataApi || apiConfig.api, data: apiConfig.data });
         } else {
-          priorities[1].push({ api: apiConfig.api, data: apiConfig.data });
+          priorities[1].push({ api: apiConfig.dataApi || apiConfig.api, data: apiConfig.data });
         }
       }
     });
