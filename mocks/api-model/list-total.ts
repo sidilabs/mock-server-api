@@ -1,16 +1,5 @@
 import { ApiData, ConfigInjection, StubCollection, StubsModule } from "../@types";
 
-function fillData(functionStr: string, relation: { [key: string]: string }) {
-  Object.keys(relation).forEach((key) => {
-    functionStr = functionStr.replace(new RegExp(key, "g"), relation[key]);
-  });
-  return functionStr;
-}
-
-function parseParams(url: string) {
-  return url.replace(/:[^\/#?]+/, "([^\\/#?]+)");
-}
-
 export type FieldGenerator = {
   methods?: string[];
   callback: (response: any, config: ConfigInjection) => any;
@@ -20,10 +9,39 @@ export type FieldGeneratorMap = {
   [key: string]: FieldGenerator;
 };
 
+export type UrlParamsMethods = "LIST" | "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+export type UrlParamsMethodsMap = {
+  [key: string]: UrlParamsMethods[];
+};
+
 export type ConfigList = {
   direct?: boolean;
   fields?: FieldGeneratorMap;
+  urlParams?: UrlParamsMethodsMap;
 };
+
+function fillData(functionStr: string, relation: { [key: string]: string }) {
+  Object.keys(relation).forEach((key) => {
+    functionStr = functionStr.replace(new RegExp(key, "g"), relation[key]);
+  });
+  return functionStr;
+}
+
+function parseParams(url: string, method: UrlParamsMethods, urlParams?: UrlParamsMethodsMap, onlyRemove = false) {
+  if (urlParams) {
+    let resultUrl = url;
+    Object.keys(urlParams).forEach((urlParam) => {
+      let methods = urlParams[urlParam];
+      if (!methods.includes(method)) {
+        resultUrl = resultUrl.replace("/" + urlParam, "");
+      }
+    });
+    return onlyRemove ? resultUrl : resultUrl.replace(/:[^\/#?]+/, "([^\\/#?]+)");
+  } else {
+    return onlyRemove ? url : url.replace(/:[^\/#?]+/, "([^\\/#?]+)");
+  }
+}
 
 export function initStubs(name: string, configApi: ApiData<ConfigList>, db: string): StubsModule {
   let jsonFields: any = "";
@@ -38,17 +56,17 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
       return acc;
     }, {});
   }
+  let __FIELDS__: FieldGeneratorMap = {}; /*"to be overwrited when called fillData";*/
 
   const relation = {
     "###db###": db,
     "###state###": `${configApi.state}`,
     "###api###": configApi.api,
     "###direct###": JSON.stringify(!!configApi.config?.direct),
-    "'###fields###'": JSON.stringify(jsonFields),
+    __FIELDS__: JSON.stringify(jsonFields),
   };
 
   function injectGet(config: ConfigInjection) {
-    config.logger.warn("config.request", JSON.stringify(config.request));
     const stateDefinition = {
       "###state###": {
         lastId: 0,
@@ -63,10 +81,10 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
     }
     const state = config.state["###db###"]["###state###"];
 
-    const id = config.request.path.replace(new RegExp("^###api###/"), "");
+    const id = config.request.path.replace(new RegExp("^###api###/".replace(/:[^\/#?]+/g, "([^\\/#?]+)")), "");
 
     let objResponse = state.data.find((entity: any) => entity.id == id);
-    let fields: any = "###fields###"; /*FieldGeneratorMap*/
+    let fields: FieldGeneratorMap = __FIELDS__;
     if (fields) {
       fields = Object.keys(fields).reduce((acc, fieldName) => {
         let fieldGenerator: FieldGenerator = fields[fieldName];
@@ -108,7 +126,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
     state.lastId++;
     let result = { id: state.lastId, ...JSON.parse(config.request.body) };
 
-    let fields: any = "###fields###"; /*FieldGeneratorMap*/
+    let fields: FieldGeneratorMap = __FIELDS__;
     if (fields) {
       fields = Object.keys(fields).reduce((acc, fieldName) => {
         let fieldGenerator: FieldGenerator = fields[fieldName];
@@ -149,7 +167,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
     }
     const state = config.state["###db###"]["###state###"];
 
-    const id = config.request.path.replace(new RegExp("^###api###/"), "");
+    const id = config.request.path.replace(new RegExp("^###api###/".replace(/:[^\/#?]+/, "([^\\/#?]+)")), "");
 
     const index: number = state.data.findIndex((entity: any) => entity.id == id);
     let result: any;
@@ -157,7 +175,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
       const entity = state.data[index];
       result = { ...entity, ...JSON.parse(config.request.body) };
 
-      let fields: any = "###fields###"; /*FieldGeneratorMap*/
+      let fields: FieldGeneratorMap = __FIELDS__;
       if (fields) {
         fields = Object.keys(fields).reduce((acc, fieldName) => {
           let fieldGenerator: FieldGenerator = fields[fieldName];
@@ -199,7 +217,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
       config.state["###db###"]["###state###"] = stateDefinition["###state###"];
     }
     const state = config.state["###db###"]["###state###"];
-    const id = config.request.path.replace(new RegExp("###api###"), "");
+    const id = config.request.path.replace(new RegExp("^###api###/".replace(/:[^\/#?]+/, "([^\\/#?]+)")), "");
     state.data = state.data.filter((entity: any) => entity.id != id);
 
     return {
@@ -254,7 +272,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
       });
     }
 
-    let fields: any = "###fields###"; /*FieldGeneratorMap*/
+    let fields: FieldGeneratorMap = __FIELDS__;
     if (list.length && fields) {
       fields = Object.keys(fields).reduce((acc, fieldName) => {
         let fieldGenerator: FieldGenerator = fields[fieldName];
@@ -319,42 +337,108 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
   const stubs: StubCollection = {
     get: {
       stub: {
-        predicates: [{ matches: { method: "GET", path: parseParams(configApi.api) + "/\\d+$" } }],
-        responses: [{ inject: fillData(injectGet.toString(), relation) }],
+        predicates: [
+          {
+            matches: { method: "GET", path: parseParams(configApi.api, "GET", configApi.config?.urlParams) + "/\\d+$" },
+          },
+        ],
+        responses: [
+          {
+            inject: fillData(injectGet.toString(), {
+              ...relation,
+              "###api###": parseParams(configApi.api, "GET", configApi.config?.urlParams, true),
+            }),
+          },
+        ],
       },
     },
     list: {
       stub: {
-        predicates: [{ matches: { method: "GET", path: parseParams(configApi.api) + "([?#].+)?$" } }],
+        predicates: [
+          {
+            matches: {
+              method: "GET",
+              path: parseParams(configApi.api, "LIST", configApi.config?.urlParams) + "([?#].+)?$",
+            },
+          },
+        ],
         responses: [
           {
-            inject: fillData(injectList.toString(), relation),
+            inject: fillData(injectList.toString(), {
+              ...relation,
+              "###api###": parseParams(configApi.api, "LIST", configApi.config?.urlParams, true),
+            }),
           },
         ],
       },
     },
     post: {
       stub: {
-        predicates: [{ matches: { method: "POST", path: parseParams(configApi.api) + "$" } }],
-        responses: [{ inject: fillData(injectPost.toString(), relation) }],
+        predicates: [
+          { matches: { method: "POST", path: parseParams(configApi.api, "POST", configApi.config?.urlParams) + "$" } },
+        ],
+        responses: [
+          {
+            inject: fillData(injectPost.toString(), {
+              ...relation,
+              "###api###": parseParams(configApi.api, "POST", configApi.config?.urlParams, true),
+            }),
+          },
+        ],
       },
     },
     put: {
       stub: {
-        predicates: [{ matches: { method: "PUT", path: parseParams(configApi.api) + "/\\d+$" } }],
-        responses: [{ inject: fillData(injectPut.toString(), relation) }],
+        predicates: [
+          {
+            matches: { method: "PUT", path: parseParams(configApi.api, "PUT", configApi.config?.urlParams) + "/\\d+$" },
+          },
+        ],
+        responses: [
+          {
+            inject: fillData(injectPut.toString(), {
+              ...relation,
+              "###api###": parseParams(configApi.api, "PUT", configApi.config?.urlParams, true),
+            }),
+          },
+        ],
       },
     },
     delete: {
       stub: {
-        predicates: [{ matches: { method: "DELETE", path: parseParams(configApi.api) + "/\\d+$" } }],
-        responses: [{ inject: fillData(injectDelete.toString(), relation) }],
+        predicates: [
+          {
+            matches: {
+              method: "DELETE",
+              path: parseParams(configApi.api, "DELETE", configApi.config?.urlParams) + "/\\d+$",
+            },
+          },
+        ],
+        responses: [
+          {
+            inject: fillData(injectDelete.toString(), {
+              ...relation,
+              "###api###": parseParams(configApi.api, "DELETE", configApi.config?.urlParams, true),
+            }),
+          },
+        ],
       },
     },
     patch: {
       stub: {
-        predicates: [{ matches: { method: "PATCH", path: parseParams(configApi.api) + "$" } }],
-        responses: [{ inject: fillData(injectPatch.toString(), relation) }],
+        predicates: [
+          {
+            matches: { method: "PATCH", path: parseParams(configApi.api, "PATCH", configApi.config?.urlParams) + "$" },
+          },
+        ],
+        responses: [
+          {
+            inject: fillData(injectPatch.toString(), {
+              ...relation,
+              "###api###": parseParams(configApi.api, "PATCH", configApi.config?.urlParams, true),
+            }),
+          },
+        ],
       },
     },
   };
