@@ -6,6 +6,7 @@
     "name": "Thyago Machado Cassimiro"
   },
   "scripts": {
+    "mb": "mb --allowInjection",
     "mock": "gulp createStubs"
   },
   "dependencies": {
@@ -17,7 +18,8 @@
     "fancy-log": "^1.3.3",
     "gulp": "^4.0.2",
     "ts-node": "^10.4.0",
-    "typescript": "^4.4.4"
+    "typescript": "^4.4.4",
+    "mountebank": "^2.5.0"
   },
   "engines": {
     "node": ">=10",
