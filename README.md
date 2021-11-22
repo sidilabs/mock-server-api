@@ -87,4 +87,4 @@ A project to facilitate the use of Mountebank
 
 - Inside `/mocks/stubs` there are some folders that can be discarded, they are there to be used as a sample;
 
-- The folder `/mocks/stubs/projects` use the api generation with urlParams and generated fields
+- The folder `/mocks/stubs/projects` use the api generation with urlParams, generated fields and query filters;

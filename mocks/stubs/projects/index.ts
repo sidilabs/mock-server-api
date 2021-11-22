@@ -4,8 +4,8 @@ const projectModuleList = require("./projectModuleList.json");
 
 import { packageBaseURL } from "../../utils";
 import { ADMIN } from "../../constants";
-import { ApiCollection, StubCollection } from "../../@types";
-import { ConfigList } from "../../api-model/list-total";
+import { ApiCollection, ConfigInjection, StubCollection } from "../../@types";
+import { ConfigList, QueryFilterMap } from "../../api-model/list-total";
 
 export const apis: ApiCollection = {
   project: {
@@ -47,6 +47,13 @@ export const apis: ApiCollection = {
           callback: () => new Date().getTime() / 1000,
         },
       },
+      query: {
+        name: "contains",
+        status: "",
+        created: (list, value) => {
+          return list.filter((item) => item.created == value);
+        },
+      } as QueryFilterMap,
     } as ConfigList,
   },
 };

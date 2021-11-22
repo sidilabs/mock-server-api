@@ -59,10 +59,27 @@ const injectResponse3 = (config: ConfigInjection) => {
   };
 };
 
-function injectResponse4(config: ConfigInjection) {
+function injectAllConfig(config: any) {
   config.response.statusCode = 240;
   config.response.headers = { "Content-Type": "application/json" };
-  config.response.body = { ...(config.response.body as {}), request: config.request };
+  config.response.body = { body: { ...(config.response.body as {}) }, request: config.request };
+
+  config.logger.warn(JSON.stringify(Object.keys(config)));
+  config.logger.warn("response:", JSON.stringify(config.response));
+  config.logger.warn("logger keys:", JSON.stringify(Object.keys(config.logger)));
+  config.logger.warn("logger scopePrefix:", config.logger.scopePrefix.toString());
+  config.logger.warn("logger withScope:", config.logger.withScope.toString());
+  config.logger.warn("logger changeScope:", config.logger.changeScope.toString());
+  config.logger.warn("logger baseLogger keys:", JSON.stringify(Object.keys(config.logger.baseLogger)));
+  config.logger.warn("logger debug:", config.logger.debug.toString());
+
+  config.logger.warn("requestFrom:", config.requestFrom);
+  config.logger.warn("method:", config.method);
+  config.logger.warn("path:", config.path);
+  config.logger.warn("query:", JSON.stringify(config.query));
+  config.logger.warn("headers:", JSON.stringify(config.headers));
+  config.logger.warn("body:", JSON.stringify(config.body));
+  config.logger.warn("ip:", config.ip);
 }
 
 export const stubs: StubCollection = {
@@ -106,7 +123,7 @@ export const stubs: StubCollection = {
         {
           is: { statusCode: 200, body: { test: 1 } },
           _behaviors: {
-            decorate: injectResponse4.toString(),
+            decorate: injectAllConfig.toString(),
           },
         },
       ],
