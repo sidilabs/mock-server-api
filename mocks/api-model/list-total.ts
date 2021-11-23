@@ -26,6 +26,7 @@ export type ConfigList = {
   direct?: boolean;
   fields?: FieldGeneratorMap;
   query?: QueryFilterMap;
+  queryPriority?: { [key: string]: number };
   urlParams?: UrlParamsMethodsMap;
 };
 
@@ -79,6 +80,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
   }
   let __FIELDS__: FieldGeneratorMap = {}; /*"to be overwrited when called fillData";*/
   let __QUERY__: QueryFilterMap;
+  let __QUERY_PRIORITY__: { [key: string]: number };
 
   const relation = {
     "###db###": db,
@@ -87,6 +89,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
     "###direct###": JSON.stringify(!!configApi.config?.direct),
     __FIELDS__: JSON.stringify(jsonFields),
     __QUERY__: JSON.stringify(queryFields),
+    __QUERY_PRIORITY__: JSON.stringify(configApi.config?.queryPriority || ""),
   };
 
   function injectGet(config: ConfigInjection) {
@@ -315,6 +318,8 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
       });
     }
 
+    let count = list.length;
+
     let querys = __QUERY__;
     if (querys) {
       querys = Object.keys(querys).reduce((acc, queryName) => {
@@ -334,24 +339,57 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
         return list;
       }
 
-      Object.keys(querys).forEach((queryRule) => {
-        const queryFilter: QueryFilter = querys[queryRule];
-        if (typeof queryFilter == "object" && queryFilter instanceof Array) {
-          const [param, filterType] = queryFilter;
-          const value = config.request.query[queryRule];
-          if (value != undefined) {
-            list = doFilter(list, param, value, filterType);
-          }
-        } else {
-          const value = config.request.query[queryRule];
-          if (value != undefined) {
-            if (typeof queryFilter == "function") {
-              list = queryFilter(list, value, config);
-            } else {
-              list = doFilter(list, queryRule, value, queryFilter);
+      function runQuerys(_querys: QueryFilterMap) {
+        Object.keys(_querys).forEach((queryRule) => {
+          const queryFilter: QueryFilter = _querys[queryRule];
+          if (typeof queryFilter == "object" && queryFilter instanceof Array) {
+            const [param, filterType] = queryFilter;
+            const value = config.request.query[queryRule];
+            if (value != undefined) {
+              list = doFilter(list, param, value, filterType);
+            }
+          } else {
+            const value = config.request.query[queryRule];
+            if (value != undefined) {
+              if (typeof queryFilter == "function") {
+                list = queryFilter(list, value, config);
+              } else {
+                list = doFilter(list, queryRule, value, queryFilter);
+              }
             }
           }
+        });
+      }
+      const queryPriority = __QUERY_PRIORITY__ || {};
+
+      let querysBefore: { [key: string]: QueryFilterMap } = {};
+      let querysAfter: { [key: string]: QueryFilterMap } = {};
+      Object.keys(querys).forEach((queryRule) => {
+        let priority = queryPriority[queryRule] || 5;
+        if (priority < 10) {
+          if (!querysBefore[priority]) {
+            querysBefore[priority] = { [queryRule]: querys[queryRule] };
+          } else {
+            querysBefore[priority][queryRule] = querys[queryRule];
+          }
+        } else {
+          if (!querysAfter[priority]) {
+            querysAfter[priority] = { [queryRule]: querys[queryRule] };
+          } else {
+            querysAfter[priority][queryRule] = querys[queryRule];
+          }
         }
+      });
+      Object.keys(querysBefore).forEach((priority) => {
+        let querysMap = querysBefore[priority];
+        runQuerys(querysMap);
+      });
+
+      count = list.length;
+
+      Object.keys(querysAfter).forEach((priority) => {
+        let querysMap = querysAfter[priority];
+        runQuerys(querysMap);
       });
     }
 
@@ -359,14 +397,14 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
       statusCode: 200,
       headers: {
         "Content-Type": "application/json",
-        ...(isDirect ? { "X-Total-Count": list.length } : {}),
+        ...(isDirect ? { "X-Total-Count": count } : {}),
       },
       body: JSON.stringify(
         isDirect
           ? list
           : {
               list,
-              total: list.length,
+              total: count,
             }
       ),
     };
