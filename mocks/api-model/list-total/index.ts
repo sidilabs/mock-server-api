@@ -69,7 +69,6 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
 
   let queryFields: any = "";
   if (configApi.config?.query) {
-    logger(configApi.config?.query);
     const query = configApi.config?.query || {};
     queryFields = Object.keys(query).reduce((acc, fieldName: string) => {
       const queryItem = query[fieldName];
@@ -80,8 +79,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
       return acc;
     }, {});
   }
-  logger(queryFields);
-  logger(configApi.config?.queryPriority);
+
   let __FIELDS__: FieldGeneratorMap = {}; /*"to be overwrited when called fillData";*/
   let __QUERY__: QueryFilterMap;
   let __QUERY_PRIORITY__: { [key: string]: number };
@@ -95,8 +93,6 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
     __QUERY__: JSON.stringify(queryFields),
     __QUERY_PRIORITY__: JSON.stringify(configApi.config?.queryPriority || ""),
   };
-
-  logger(relation.__QUERY__);
 
   function injectGet(config: ConfigInjection) {
     const stateDefinition = {
@@ -447,8 +443,6 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
     ...relation,
     "###api###": parseParams(configApi.api, "LIST", configApi.config?.urlParams, true),
   });
-
-  logger(filledList);
 
   const stubs: StubCollection = {
     get: {
