@@ -49,10 +49,30 @@ export const apis: ApiCollection = {
       query: {
         applicationName: ["name", "CONTAINS"],
         status: "CONTAINS",
-        created: (list, value) => {
+        created: (list, value, config) => {
           return list.filter((item) => item.created == value);
         },
-      } as QueryFilterMap,
+        sort: (list, value, config) => {
+          const result = [...list];
+          const order = config.request.query["order"] || "asc";
+          result.sort((a, b) => {
+            if (order == "asc") {
+              return a[value] > b[value] ? 1 : a[value] == b[value] ? 0 : -1;
+            } else {
+              return a[value] < b[value] ? 1 : a[value] == b[value] ? 0 : -1;
+            }
+          });
+          return list;
+        },
+        offset: (list, value, config) => {
+          const size = +(config.request.query["size"] || "10");
+          return list.slice(value, value + size);
+        },
+      },
+      queryPriority: {
+        sort: 6,
+        offset: 10,
+      },
     } as ConfigList,
   },
 };

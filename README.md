@@ -103,3 +103,5 @@ There are some options for query filters they are:
 - - list: array of values that would be returned without this filter,
 - - value: the value of the query param;
 - - config: object containing all the values passed by Mountebank
+
+- queryPriority: set the priority of an query, if the priority is greater than 9 that query will be executed after extract the list length.
