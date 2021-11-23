@@ -9,6 +9,13 @@ export type FieldGeneratorMap = {
   [key: string]: FieldGenerator;
 };
 
+export type QueryFilterFunction = (list: any[], value: any, config: ConfigInjection) => any[];
+export type QueryFilter = QueryFilterFunction | "CONTAINS" | string | string[];
+
+export type QueryFilterMap = {
+  [key: string]: QueryFilter;
+};
+
 export type UrlParamsMethods = "LIST" | "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 export type UrlParamsMethodsMap = {
@@ -18,6 +25,7 @@ export type UrlParamsMethodsMap = {
 export type ConfigList = {
   direct?: boolean;
   fields?: FieldGeneratorMap;
+  query?: QueryFilterMap;
   urlParams?: UrlParamsMethodsMap;
 };
 
@@ -56,7 +64,21 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
       return acc;
     }, {});
   }
+
+  let queryFields: any = "";
+  if (configApi.config?.query) {
+    const query = configApi.config?.query || {};
+    queryFields = Object.keys(query).reduce((acc, fieldName: string) => {
+      const queryItem = query[fieldName];
+      acc = {
+        ...acc,
+        [fieldName]: typeof queryItem == "function" ? queryItem.toString() : JSON.stringify(queryItem),
+      };
+      return acc;
+    }, {});
+  }
   let __FIELDS__: FieldGeneratorMap = {}; /*"to be overwrited when called fillData";*/
+  let __QUERY__: QueryFilterMap;
 
   const relation = {
     "###db###": db,
@@ -64,6 +86,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
     "###api###": configApi.api,
     "###direct###": JSON.stringify(!!configApi.config?.direct),
     __FIELDS__: JSON.stringify(jsonFields),
+    __QUERY__: JSON.stringify(queryFields),
   };
 
   function injectGet(config: ConfigInjection) {
@@ -289,6 +312,46 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
           result = { ...result, [fieldName]: generator(result, config) };
         });
         return result;
+      });
+    }
+
+    let querys = __QUERY__;
+    if (querys) {
+      querys = Object.keys(querys).reduce((acc, queryName) => {
+        let queryFilter: QueryFilter = querys[queryName];
+        return { ...acc, [queryName]: eval(`(${queryFilter})`) };
+      }, {});
+
+      function doFilter(_list: any[], objParam: string, value: any, filterType: string) {
+        let list = _list;
+        if (/^CONTAINS$/.test(filterType)) {
+          list = _list.filter((item) => {
+            return item[objParam].toString().toLowerCase().indexOf(value.toLowerCase()) >= 0;
+          });
+        } else {
+          list = _list.filter((item) => item[objParam] == value);
+        }
+        return list;
+      }
+
+      Object.keys(querys).forEach((queryRule) => {
+        const queryFilter: QueryFilter = querys[queryRule];
+        if (typeof queryFilter == "object" && queryFilter instanceof Array) {
+          const [param, filterType] = queryFilter;
+          const value = config.request.query[queryRule];
+          if (value != undefined) {
+            list = doFilter(list, param, value, filterType);
+          }
+        } else {
+          const value = config.request.query[queryRule];
+          if (value != undefined) {
+            if (typeof queryFilter == "function") {
+              list = queryFilter(list, value, config);
+            } else {
+              list = doFilter(list, queryRule, value, queryFilter);
+            }
+          }
+        }
       });
     }
 
