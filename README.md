@@ -88,3 +88,18 @@ A project to facilitate the use of Mountebank
 - Inside `/mocks/stubs` there are some folders that can be discarded, they are there to be used as a sample;
 
 - The folder `/mocks/stubs/projects` use the api generation with urlParams, generated fields and query filters;
+
+
+### Query filters options  (using list-total model api)
+There are some options for query filters they are:
+
+- "CONTAINS" : the query param name must be equal to the param inside the object,  the query param value must be inside the object param value
+
+- any other string: the same as "CONTAINS" but it  will search for equality;
+
+- array [param, type]: the 'param' is the param name in the object, the 'type' follow the above rules
+
+- (funtion) : the funcion will have this structure:  (list: any[], value: any, config: ConfigInjection) => any[];
+- - list: array of values that would be returned without this filter,
+- - value: the value of the query param;
+- - config: object containing all the values passed by Mountebank

@@ -27,7 +27,6 @@ export const apis: ApiCollection = {
     } as ConfigList,
   },
   projectModule: {
-    model: "list-total",
     api: "/project/:projectId/module",
     dataApi: "/project/module",
     data: projectModuleList,
@@ -48,8 +47,8 @@ export const apis: ApiCollection = {
         },
       },
       query: {
-        name: "contains",
-        status: "",
+        applicationName: ["name", "CONTAINS"],
+        status: "CONTAINS",
         created: (list, value) => {
           return list.filter((item) => item.created == value);
         },

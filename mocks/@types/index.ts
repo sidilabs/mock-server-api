@@ -75,7 +75,7 @@ export type StubsModule = {
 export type ApiMethods = "LIST" | "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
 export type ApiData<T> = {
-  model: string;
+  model?: string;
   state: string;
   api: RegExpString;
   dataApi?: string;

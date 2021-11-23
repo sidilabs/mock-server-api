@@ -10,7 +10,7 @@ export type FieldGeneratorMap = {
 };
 
 export type QueryFilterFunction = (list: any[], value: any, config: ConfigInjection) => any[];
-export type QueryFilter = QueryFilterFunction | "contains" | string;
+export type QueryFilter = QueryFilterFunction | "CONTAINS" | string | string[];
 
 export type QueryFilterMap = {
   [key: string]: QueryFilter;
@@ -322,24 +322,34 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
         return { ...acc, [queryName]: eval(`(${queryFilter})`) };
       }, {});
 
-      Object.keys(querys).forEach((queryName) => {
-        const queryFilter = querys[queryName];
-        const value = config.request.query[queryName];
-        config.logger.warn(value);
-        if (value != undefined) {
-          if (typeof queryFilter == "function") {
-            config.logger.warn("function");
-            list = queryFilter(list, value, config);
-          } else if (/^contains$/i.test(queryFilter)) {
-            config.logger.warn("contains");
-            list = list.filter((item) => {
-              config.logger.warn(item[queryName]);
-              config.logger.warn(value);
-              return item[queryName].toString().toLowerCase().indexOf(value.toLowerCase()) >= 0;
-            });
-          } else {
-            config.logger.warn("equals");
-            list = list.filter((item) => item[queryName] == value);
+      function doFilter(_list: any[], objParam: string, value: any, filterType: string) {
+        let list = _list;
+        if (/^CONTAINS$/.test(filterType)) {
+          list = _list.filter((item) => {
+            return item[objParam].toString().toLowerCase().indexOf(value.toLowerCase()) >= 0;
+          });
+        } else {
+          list = _list.filter((item) => item[objParam] == value);
+        }
+        return list;
+      }
+
+      Object.keys(querys).forEach((queryRule) => {
+        const queryFilter: QueryFilter = querys[queryRule];
+        if (typeof queryFilter == "object" && queryFilter instanceof Array) {
+          const [param, filterType] = queryFilter;
+          const value = config.request.query[queryRule];
+          if (value != undefined) {
+            list = doFilter(list, param, value, filterType);
+          }
+        } else {
+          const value = config.request.query[queryRule];
+          if (value != undefined) {
+            if (typeof queryFilter == "function") {
+              list = queryFilter(list, value, config);
+            } else {
+              list = doFilter(list, queryRule, value, queryFilter);
+            }
           }
         }
       });
