@@ -87,7 +87,7 @@ A project to facilitate the use of Mountebank
 
 - Inside `/mocks/stubs` there are some folders that can be discarded, they are there to be used as a sample;
 
-- The folder `/mocks/stubs/projects` use the api generation with urlParams, generated fields and query filters;
+- The folder `/mocks/stubs/projects` use the api generation with urlParams, generated fields and query functions;
 
 
 ### Query filters options  (using list-total model api)
@@ -104,4 +104,6 @@ There are some options for query filters they are:
 - - value: the value of the query param;
 - - config: object containing all the values passed by Mountebank
 
-- queryPriority: set the priority of an query, if the priority is greater than 9 that query will be executed after extract the list length.
+- queryPriority: set the priority of an query, if the priority is greater than 9 that query will be executed after extract the list length, default value is 5.
+
+- `list-total/utils.ts` there are 2 functions that could be used to add query function: `sort` = used to sort the result list,  `offset` = used for pagination, a sample of use is on `/mocks/stubs/projects`
