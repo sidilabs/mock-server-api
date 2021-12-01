@@ -15,5 +15,5 @@ export const sort: QueryFunction = (list, value, config) => {
 
 export const offset: QueryFunction = (list, value, config) => {
   const size = +(config.request.query["size"] || "10");
-  return list.slice(value, value + size);
+  return list.slice(+value, +value + size);
 };
