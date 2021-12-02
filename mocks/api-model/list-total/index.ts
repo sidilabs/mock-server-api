@@ -468,7 +468,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
           {
             matches: {
               method: "GET",
-              path: parseParams(configApi.api, "LIST", configApi.config?.urlParams) + "([?#].+)?$",
+              path: parseParams(configApi.api, "LIST", configApi.config?.urlParams) + "/?([?#].+)?$",
             },
           },
         ],
@@ -482,7 +482,9 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
     post: {
       stub: {
         predicates: [
-          { matches: { method: "POST", path: parseParams(configApi.api, "POST", configApi.config?.urlParams) + "$" } },
+          {
+            matches: { method: "POST", path: parseParams(configApi.api, "POST", configApi.config?.urlParams) + "/?$" },
+          },
         ],
         responses: [
           {
@@ -535,7 +537,10 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
       stub: {
         predicates: [
           {
-            matches: { method: "PATCH", path: parseParams(configApi.api, "PATCH", configApi.config?.urlParams) + "$" },
+            matches: {
+              method: "PATCH",
+              path: parseParams(configApi.api, "PATCH", configApi.config?.urlParams) + "/?$",
+            },
           },
         ],
         responses: [
