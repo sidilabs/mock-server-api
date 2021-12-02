@@ -67,8 +67,6 @@ A project to facilitate the use of Mountebank
   - Every time that its necessary to update the mock server it is just this command again.
 
 
-## Run steps using (Docker only)
-
 ## Integrating with another project:
 
 - An project can copy all this project inside of it and make it available to others as unique project, with only a few configuration options.
@@ -86,8 +84,12 @@ A project to facilitate the use of Mountebank
 ## The current mock-server project
 
 - Inside `/mocks/stubs` there are some folders that can be discarded, they are there to be used as a sample;
-
-- The folder `/mocks/stubs/projects` use the api generation with urlParams, generated fields and query functions;
+#### There is two methods of generating the mock:
+1. from any index.ts inside a folder in `/mock/stubs` export the stubs as: `export const stubs`
+    1. This `stubs` const is a mapper of stubs as `{ anyStubName: { stub: ({} as StubData) } as StubCollection`
+    2. For better understanding see the file `@types/index.ts` there is a lot of definitions including `StubData` and `StubCollection`
+2. from any index.ts inside a folder in `/mock/stubs` export the apis as: `export const apis`
+    1. A better example is implemented on the folder `/mocks/stubs/projects` there is use of urlParams, generated fields and query functions;
 
 
 ### Query filters options  (using list-total model api)
@@ -100,9 +102,9 @@ There are some options for query filters they are:
 - array [param, type]: the 'param' is the param name in the object, the 'type' follow the above rules
 
 - (funtion) : the funcion will have this structure:  (list: any[], value: any, config: ConfigInjection) => any[];
-- - list: array of values that would be returned without this filter,
-- - value: the value of the query param;
-- - config: object containing all the values passed by Mountebank
+  - list: array of values that would be returned without this filter,
+  - value: the value of the query param;
+  - config: object containing all the values passed by Mountebank
 
 - queryPriority: set the priority of an query, if the priority is greater than 9 that query will be executed after extract the list length, default value is 5.
 
