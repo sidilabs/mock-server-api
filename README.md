@@ -6,7 +6,6 @@ A project to facilitate the use of Mountebank
 
 1. **Mountebank** - server used to run the mocked API
 2. **docker-compose** - used to initiate the Mountebank
-3. **gulp** - run the tasks used to configure the mocked API
 
 ## Configurations
 
@@ -18,13 +17,11 @@ A project to facilitate the use of Mountebank
   - command:
     - allowInjection - flag to allow injection of functions on Mountebank
 
-### gulpfile.js
-  - used to run the tasks to configure the mock api
 
-### mocks/mconfig.ts
+### src/mconfig.ts
   - configuration file with required values
 
-### mocks/stubs
+### src/stubs
   - folder with all stubs packages that will be used
   - every folder directly inside `/stubs` must have an `index.ts` file that exports the stubs object
   - the export stubs object is as follow:
@@ -40,10 +37,10 @@ A project to facilitate the use of Mountebank
 </pre>
   it is an object that has a stubs property that map each 'stubName' and its stub object, the stub object follow the contract of Mountebank: http://localhost:2525/docs/api/contracts?type=addStub
 
-### mocks/stubs/index.ts
+### src/stubs/index.ts
   - file that load and configure all stubs packages
 
-### mocks/index.ts
+###  src/index.ts
   - file responsible to communicate with the Mountebank and configure the mock server
 
 ## Required configurations 
@@ -77,7 +74,6 @@ A project to facilitate the use of Mountebank
 /my-sample-project    - project folder
   /src                - my sample project source code
   /mocks              -  main folder used by the mock-server project.
-  /gulpfile.ts        - File used by mock-server project
   /package.json       - Some configurations inside it are needed to start the mock-server project
   /tsconfig.json      - Some configuration to run correctly with Typescript
 </pre>

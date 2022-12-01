@@ -1,22 +1,22 @@
 import fs from "fs";
 import path from "path";
 
-import { packageBaseURL, extendModuleBehavior } from "../utils";
-import { config, imposter } from "../mconfig";
+import { packageBaseURL, extendModuleBehavior, MockConfig } from "../utils";
+
 import { ApiStub, StubCollection, StubsModule } from "../@types";
-
 import { initApi } from "../api-model";
-
 import { options } from "./cors";
 
-const loadStubs = () => {
+const loadStubs = (mockConfig: MockConfig) => {
+  const { config, imposter } = mockConfig;
   const directory = config.stubsFolder;
+  console.log("directory: " + directory);
   const dirs: string[] = fs
     .readdirSync(directory)
     .filter((file: string) => fs.lstatSync(path.resolve(directory, file)).isDirectory());
   let packages: [string, StubCollection][] = [];
   dirs.forEach((dirName: string) => {
-    const apiStubMock: ApiStub = require("./" + dirName);
+    const apiStubMock: ApiStub = require(path.resolve(directory, dirName));
     if (!apiStubMock.stubs) {
       return;
     }
@@ -29,24 +29,29 @@ const loadStubs = () => {
   return Object.fromEntries(packages);
 };
 
-const loadApis = () => {
+const loadApis = (mockConfig: MockConfig) => {
+  const { config } = mockConfig;
   const directory = config.stubsFolder;
   const dirs: string[] = fs
     .readdirSync(directory)
     .filter((file: string) => fs.lstatSync(path.resolve(directory, file)).isDirectory());
   let apiStubsModule: StubsModule = {};
   dirs.forEach((dirName: string) => {
-    const apiStubMock: ApiStub = require("./" + dirName);
-    if (apiStubMock.apis) apiStubsModule = { ...apiStubsModule, ...initApi(dirName, apiStubMock.apis) };
+    const apiStubMock: ApiStub = require(path.resolve(directory, dirName));
+    if (apiStubMock.apis) apiStubsModule = { ...apiStubsModule, ...initApi(mockConfig, dirName, apiStubMock.apis) };
   });
   return apiStubsModule;
 };
 
-export const stubsModule: StubsModule = {
-  ...extendModuleBehavior({ ...loadApis(), ...loadStubs(), cors: { options } }, config, imposter),
+export const loadStubModules = (mockConfig: MockConfig) => {
+  const { config, imposter } = mockConfig;
+  return {
+    ...extendModuleBehavior({ ...loadApis(mockConfig), ...loadStubs(mockConfig), cors: { options } }, config, imposter),
+  } as StubsModule;
 };
 
-const loadApiData = () => {
+export const loadStubsApiData = (mockConfig: MockConfig) => {
+  const { config } = mockConfig;
   const directory = config.stubsFolder;
   const dirs: string[] = fs
     .readdirSync(directory)
@@ -54,7 +59,7 @@ const loadApiData = () => {
   let apisData: { api: string; data: any[] }[] = [];
   let priorities: { [key: string]: any[] } = { 1: [] };
   dirs.forEach((dirName: string) => {
-    const apiStubMock: ApiStub = require("./" + dirName);
+    const apiStubMock: ApiStub = require(path.resolve(directory, dirName));
     if (!apiStubMock.apis) return;
     Object.keys(apiStubMock.apis).forEach((key: string) => {
       if (!apiStubMock.apis) return;
@@ -74,5 +79,3 @@ const loadApiData = () => {
   });
   return apisData;
 };
-
-export const initialApisData = loadApiData();

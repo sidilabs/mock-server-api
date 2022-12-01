@@ -1,4 +1,4 @@
-export type MConfig = {
+export type Config = {
   mountebankUrl: string;
   mountebankPort: string;
   apiTimeout: number;
@@ -7,12 +7,12 @@ export type MConfig = {
   memDB: string;
 };
 
-export const config: MConfig = {
+export const config: Config = {
   mountebankUrl: "http://localhost",
   mountebankPort: "2525",
   apiTimeout: 500,
   appUrl: "http://localhost:3000",
-  stubsFolder: "./mocks/stubs",
+  stubsFolder: "./src/stubs",
   memDB: "__db__",
 };
 

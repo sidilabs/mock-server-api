@@ -1,16 +1,11 @@
 import axios from "axios";
-import log from "fancy-log";
 import { StubData } from "./@types";
+import { loadStubModules, loadStubsApiData } from "./stubs";
+import { loadConfig, MockConfig } from "./utils";
 
-import { config, imposter } from "./mconfig";
+async function restartImposter({ config, imposter }: MockConfig) {
+  const urlImposters = config.mountebankUrl + ":" + config.mountebankPort + "/imposters";
 
-const urlImposters = config.mountebankUrl + ":" + config.mountebankPort + "/imposters";
-
-const urlMockedApi = config.mountebankUrl + ":" + imposter.port;
-
-import { stubsModule, initialApisData } from "./stubs";
-
-async function restartImposter() {
   try {
     await axios({
       method: "delete",
@@ -23,15 +18,16 @@ async function restartImposter() {
       timeout: 500,
       data: imposter,
     });
-    log("Imposter at " + imposter.port + " (re)started...");
+    console.log("Imposter at " + imposter.port + " (re)started...");
   } catch (error: any) {
-    log(error.response);
+    console.log(error.response);
     throw error;
   } finally {
   }
 }
 
-async function saveStub(stub: string, data: StubData) {
+async function saveStub({ config, imposter }: MockConfig, stub: string, data: StubData) {
+  const urlImposters = config.mountebankUrl + ":" + config.mountebankPort + "/imposters";
   try {
     const response = await axios({
       method: "post",
@@ -41,16 +37,17 @@ async function saveStub(stub: string, data: StubData) {
     });
     const status = response.status;
     if (status >= 200 && status < 300) {
-      log(`Stub: ${stub}`);
+      console.log(`Stub: ${stub}`);
     } else {
-      log.error(`Error stubbing data: ${stub}`, response);
+      console.error(`Error stubbing data: ${stub}`, response);
     }
   } catch (e) {
-    log.error(`Error stubbing: ${stub}`, e);
+    console.error(`Error stubbing: ${stub}`, e);
   }
 }
 
-async function loadApiData(api: string, data: any[]) {
+async function loadApiData({ config, imposter }: MockConfig, api: string, data: any[]) {
+  const urlMockedApi = config.mountebankUrl + ":" + imposter.port;
   try {
     const response = await axios({
       method: "patch",
@@ -60,37 +57,44 @@ async function loadApiData(api: string, data: any[]) {
     });
     const status = response.status;
     if (status >= 200 && status < 300) {
-      log(`Loaded api: ${api}`);
+      console.log(`Loaded api: ${api}`);
     } else {
-      log.error(`Error loading data: ${api}`, response);
+      console.error(`Error loading data: ${api}`, response);
     }
   } catch (e) {
-    log.error(`Error loading data: ${api}`, e);
+    console.error(`Error loading data: ${api}`, e);
   }
 }
 
-const createStubs = async () => {
+const createStubs = async (mockConfig: MockConfig) => {
+  const stubsModule = loadStubModules(mockConfig);
   for (const spNames in stubsModule) {
     const stubsCollection = stubsModule[spNames];
     for (const sNames in stubsCollection) {
       const stubData = stubsCollection[sNames];
-      await saveStub(`${spNames}:${sNames}`, stubData);
+      await saveStub(mockConfig, `${spNames}:${sNames}`, stubData);
     }
   }
 };
 
-const initializeApiData = async () => {
+const initializeApiData = async (mockConfig: MockConfig) => {
   await new Promise((resolve, reject) => {
     setTimeout(() => resolve(true), 500);
   });
+  const initialApisData = loadStubsApiData(mockConfig);
   for (var index in initialApisData) {
     const apiData = initialApisData[index];
-    loadApiData(apiData.api, apiData.data);
+    loadApiData(mockConfig, apiData.api, apiData.data);
   }
 };
 
-export const init = async () => {
-  await restartImposter();
-  await createStubs();
-  await initializeApiData();
+export const init = async (configPathWithoutExtension?: string) => {
+  const config = loadConfig(configPathWithoutExtension);
+  await restartImposter(config);
+  await createStubs(config);
+  await initializeApiData(config);
 };
+
+export * from "./@types";
+export type { ConfigList, QueryFilterMap } from "./api-model/list-total";
+export * as queryFns from "./api-model/list-total/utils";

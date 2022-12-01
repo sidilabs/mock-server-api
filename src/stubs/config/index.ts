@@ -1,12 +1,12 @@
 import { StubCollection } from "../../@types";
 
-const configList = require("./configList.json");
-const config = require("./config.json");
-const configResourceList = require("./configResourceList.json");
-const configResource = require("./configResource.json");
+import configList from "./configList.json";
+import config from "./config.json";
+import configResourceList from "./configResourceList.json";
+import configResource from "./configResource.json";
 
 import { packageBaseURL } from "../../utils";
-import { ADMIN } from "../../constants";
+import { ADMIN } from "../../utils/constants";
 
 export const stubs: StubCollection = packageBaseURL(ADMIN, {
   configList: {

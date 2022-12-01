@@ -1,8 +1,7 @@
 import { ApiCollection, ApiData, ApiStub, StubsModule } from "../@types";
 import * as listTotal from "./list-total";
 import * as internalList from "./internal-list";
-
-import { config, imposter } from "../mconfig";
+import { MockConfig } from "../utils";
 
 type InitStubs = (name: string, configApi: ApiData<any>, db: string) => StubsModule;
 
@@ -15,7 +14,8 @@ export const models: Models = {
   "internal-list": internalList.initStubs,
 };
 
-export function initApi(packName: string, apiCollection: ApiCollection) {
+export function initApi(mockConfig: MockConfig, packName: string, apiCollection: ApiCollection) {
+  const { config } = mockConfig;
   let stubsModule: StubsModule = {};
   Object.keys(apiCollection).forEach((key) => {
     const apiData = apiCollection[key];

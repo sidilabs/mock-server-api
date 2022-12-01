@@ -8,10 +8,44 @@ import {
   Stub,
   ConfigInjection,
   StubsModule,
-} from "./@types";
+} from "../@types";
 
-import log from "fancy-log";
-import { ImposterDefaults, MConfig } from "./mconfig";
+import fs from "fs";
+import { ImposterDefaults, Config } from "./mbconfig";
+import path from "path";
+
+export type MockConfig = { config: Config; imposter: ImposterDefaults };
+
+const loadConfig = (filePathWithoutExtension?: string) => {
+  let fileconfig = null;
+  let hasFound = false;
+  let extension = ".ts";
+  let fullPath = filePathWithoutExtension ?? "mbconfig" + extension;
+  console.log("fullPath: " + fullPath);
+  try {
+    if (fs.existsSync(path.resolve(fullPath))) {
+      hasFound = true;
+    } else {
+      extension = ".js";
+      if (fs.existsSync(path.resolve(fullPath))) {
+        hasFound = true;
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+  if (hasFound) {
+    fileconfig = require(path.resolve(fullPath));
+  } else {
+    console.error("mbconfig.ts file not found, using default file");
+    if (fs.existsSync(path.resolve(__dirname, "mbconfig.ts"))) {
+      fileconfig = require(path.resolve(__dirname, "mbconfig.ts"));
+    } else {
+      fileconfig = require(path.resolve(__dirname, "mbconfig.js"));
+    }
+  }
+  return fileconfig as MockConfig;
+};
 
 const responseExtendBehavior = (
   response: Response,
@@ -94,7 +128,7 @@ const packageBaseURL = (url: string, packageStubs: StubCollection) => {
   return packageStubs;
 };
 
-const extendModuleBehavior = (stubsModule: StubsModule, config: MConfig, imposter: ImposterDefaults) => {
+const extendModuleBehavior = (stubsModule: StubsModule, config: Config, imposter: ImposterDefaults) => {
   let headers: { [key: string]: string | boolean | number } = { ...imposter.defaultResponse.headers };
   delete headers["Mountebank-Id"];
   let strHeaders = JSON.stringify(headers);
@@ -122,4 +156,37 @@ const extendModuleBehavior = (stubsModule: StubsModule, config: MConfig, imposte
   return stubsModule;
 };
 
-export { responseExtendBehavior, stubExtendBehavior, packageExtendBehavior, packageBaseURL, extendModuleBehavior };
+function objStringify(obj: any, prefix = "_!@#Ev#@!_") {
+  return JSON.stringify(obj, function (key, value) {
+    if (value instanceof Function || typeof value == "function" || value instanceof RegExp) {
+      return prefix + value;
+    }
+    return value;
+  });
+}
+
+function objParse(str: string, prefix = "_!@#Ev#@!_") {
+  return JSON.parse(str, function (key, value) {
+    if (typeof value != "string") {
+      return value;
+    }
+    if (value.length < prefix.length) {
+      return value;
+    }
+    if (prefix && value.substring(0, prefix.length) === prefix) {
+      return eval("(" + value.slice(10) + ")");
+    }
+    return value;
+  });
+}
+
+export {
+  loadConfig,
+  responseExtendBehavior,
+  stubExtendBehavior,
+  packageExtendBehavior,
+  packageBaseURL,
+  extendModuleBehavior,
+  objStringify,
+  objParse,
+};
