@@ -1,11 +1,8 @@
-const projectList = require("./projectList.json");
-const project = require("./project.json");
-const projectModuleList = require("./projectModuleList.json");
+import projectList from "./projectList.json";
+import projectModuleList from "./projectModuleList.json";
 
-import { packageBaseURL } from "../../utils";
-import { ADMIN } from "../../constants";
-import { ApiCollection, ConfigInjection, StubCollection } from "../../@types";
-import { ConfigList, QueryFilterMap } from "../../api-model/list-total";
+import { ApiCollection } from "../../@types";
+import { ConfigList } from "../../api-model/list-total";
 import { sort, offset } from "../../api-model/list-total/utils";
 
 export const apis: ApiCollection = {
@@ -26,12 +23,8 @@ export const apis: ApiCollection = {
         },
       },
       query: {
-        sort,
-        offset,
-      },
-      queryPriority: {
-        sort: 6,
-        offset: 10,
+        sort: [6, sort],
+        offset: [10, offset],
       },
     } as ConfigList,
   },
@@ -56,11 +49,14 @@ export const apis: ApiCollection = {
         },
       },
       query: {
-        applicationName: ["name", "CONTAINS"],
-        status: "CONTAINS",
-        created: (list, value, config) => {
-          return list.filter((item) => item.created == value);
-        },
+        applicationName: [, ["name", "CONTAINS"]],
+        status: [, "CONTAINS"],
+        created: [
+          ,
+          (list, value, config) => {
+            return list.filter((item) => item.created == value);
+          },
+        ],
       },
     } as ConfigList,
   },

@@ -1,4 +1,4 @@
-import { ApiCollection, ConfigInjection } from "../../@types";
+import { ApiCollection } from "../../@types";
 
 export const apis: ApiCollection = {
   sample: {

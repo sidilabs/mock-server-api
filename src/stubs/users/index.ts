@@ -1,8 +1,8 @@
-const userList = require("./userList.json");
-const user = require("./user.json");
+import userList from "./userList.json";
+import user from "./user.json";
 
 import { packageBaseURL } from "../../utils";
-import { ADMIN } from "../../constants";
+import { ADMIN } from "../../utils/constants";
 import { StubCollection } from "../../@types";
 
 export const stubs: StubCollection = packageBaseURL(ADMIN, {

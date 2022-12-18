@@ -1,8 +1,8 @@
 import { ConfigInjection, StubCollection } from "../../@types";
 import { packageBaseURL } from "../../utils";
-import { ADMIN } from "../../constants";
+import { ADMIN } from "../../utils/constants";
 
-const permissionList = require("./permissionList.json");
+import permissionList from "./permissionList.json";
 
 const onLogout = (config: ConfigInjection) => {
   const headers = config.request.headers;
@@ -29,7 +29,7 @@ export const stubs: StubCollection = packageBaseURL(ADMIN, {
   permission: {
     stub: {
       predicates: [{ matches: { method: "GET", path: "/permission" } }],
-      responses: [{ is: { body: permissionList } }],
+      responses: [{ is: { body: JSON.stringify(permissionList) } }],
     },
   },
   logout: {

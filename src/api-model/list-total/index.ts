@@ -1,4 +1,3 @@
-import logger from "fancy-log";
 import { ApiData, ConfigInjection, StubCollection, StubsModule } from "../../@types";
 
 export type FieldGenerator = {
@@ -13,8 +12,10 @@ export type FieldGeneratorMap = {
 export type QueryFunction = (list: any[], value: any, config: ConfigInjection) => any[];
 export type QueryOption = QueryFunction | "CONTAINS" | string | string[];
 
+type OptionalNumber = number | null | undefined;
+
 export type QueryFilterMap = {
-  [key: string]: QueryOption;
+  [key: string]: [OptionalNumber, QueryOption];
 };
 
 export type UrlParamsMethods = "LIST" | "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -27,7 +28,6 @@ export type ConfigList = {
   direct?: boolean;
   fields?: FieldGeneratorMap;
   query?: QueryFilterMap;
-  queryPriority?: { [key: string]: number };
   urlParams?: UrlParamsMethodsMap;
 };
 
@@ -71,7 +71,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
   if (configApi.config?.query) {
     const query = configApi.config?.query || {};
     queryFields = Object.keys(query).reduce((acc, fieldName: string) => {
-      const queryItem = query[fieldName];
+      const queryItem = query[fieldName][1];
       acc = {
         ...acc,
         [fieldName]: typeof queryItem == "function" ? queryItem.toString() : JSON.stringify(queryItem),
@@ -82,7 +82,6 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
 
   let __FIELDS__: FieldGeneratorMap = {}; /*"to be overwrited when called fillData";*/
   let __QUERY__: QueryFilterMap;
-  let __QUERY_PRIORITY__: { [key: string]: number };
 
   const relation = {
     "###db###": db,
@@ -91,7 +90,6 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
     "###direct###": JSON.stringify(!!configApi.config?.direct),
     __FIELDS__: JSON.stringify(jsonFields),
     __QUERY__: JSON.stringify(queryFields),
-    __QUERY_PRIORITY__: JSON.stringify(configApi.config?.queryPriority || ""),
   };
 
   function injectGet(config: ConfigInjection) {
@@ -326,7 +324,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
 
     if (querys) {
       querys = Object.keys(querys).reduce((acc, queryName) => {
-        let queryFilter: QueryOption = querys[queryName];
+        let queryFilter: QueryOption = querys[queryName][1];
         return { ...acc, [queryName]: eval(`(${queryFilter})`) };
       }, {});
 
@@ -344,7 +342,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
 
       function runQuerys(_querys: QueryFilterMap) {
         Object.keys(_querys).forEach((queryRule) => {
-          const queryFilter: QueryOption = _querys[queryRule];
+          const queryFilter: QueryOption = _querys[queryRule][1];
           if (typeof queryFilter == "object" && queryFilter instanceof Array) {
             const [param, filterType] = queryFilter;
             const value = config.request.query[queryRule];
@@ -363,12 +361,12 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
           }
         });
       }
-      const queryPriority = __QUERY_PRIORITY__ || {};
 
       let querysBefore: { [key: string]: QueryFilterMap } = {};
       let querysAfter: { [key: string]: QueryFilterMap } = {};
       Object.keys(querys).forEach((queryRule) => {
-        let priority = queryPriority[queryRule] || 5;
+        const query = querys[queryRule];
+        let priority = query[0] ?? 5;
         if (priority < 10) {
           if (!querysBefore[priority]) {
             querysBefore[priority] = { [queryRule]: querys[queryRule] };
