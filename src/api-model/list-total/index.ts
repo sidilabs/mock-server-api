@@ -86,7 +86,6 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
   let __FIELDS__: FieldGeneratorMap = {}; /*"to be overwrited when called fillData";*/
   let __QUERY__: QueryFilterMap;
 
-  console.log(JSON.stringify(queryFields));
   const relation = {
     "###db###": db,
     "###state###": `${configApi.state}`,

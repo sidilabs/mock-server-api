@@ -1,24 +1,9 @@
+import type { Config, ImposterDefaults } from "mock-server-api";
+
 import path from "path";
 
-export type Config = {
-  mountebankUrl: string;
-  mountebankPort: string;
-  apiTimeout: number;
-  appUrl: string;
-  stubsFolder: string;
-  memDB: string;
-  axios: {
-    timeout: {
-      clearImposter: number;
-      createImposter: number;
-      createStub: number;
-      loadStubData: number;
-    };
-  };
-};
-
 export const config: Config = (() => {
-  const stubsFolder = path.join(__dirname, "..", "stubs");
+  const stubsFolder = path.join(__dirname, "..", "dist", "stubs");
   return {
     mountebankUrl: "http://localhost",
     mountebankPort: "2525",
@@ -36,18 +21,6 @@ export const config: Config = (() => {
     },
   };
 })();
-
-export type ImposterDefaults = {
-  port: number;
-  protocol: string;
-  name: string;
-  defaultResponse: {
-    statusCode: string | number;
-    headers: {
-      [key: string]: string | number | boolean;
-    };
-  };
-};
 
 export const imposter: ImposterDefaults = {
   port: 8090,
