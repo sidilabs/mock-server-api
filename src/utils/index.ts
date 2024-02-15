@@ -37,6 +37,12 @@ const loadConfig = (filePathWithoutExtension?: string) => {
   if (hasFound) {
     fileconfig = require(path.resolve(fullPath));
   } else {
+    console.log("=============================================");
+    console.log(__dirname, __filename);
+    console.log("=============================================");
+    console.log(process.cwd());
+
+    console.log("=============================================");
     console.error("mbconfig.ts file not found, using default file");
     if (fs.existsSync(path.resolve(__dirname, "mbconfig.ts"))) {
       fileconfig = require(path.resolve(__dirname, "mbconfig.ts"));

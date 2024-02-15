@@ -13,6 +13,7 @@
   "scripts": {
     "mb": "mb start --allowInjection",
     "mock": "ts-node src/start.ts",
+    "premock:dist": "tsc",
     "mock:dist": "node dist/start.js",
     "build": "tsc"
   },

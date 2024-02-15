@@ -1,0 +1,12 @@
+{
+  "errors": [
+    {
+      "code": "invalid injection",
+      "message": "invalid response injection",
+      "source": "((config) => {\r\n    const p = require(\"path\");\r\n    const pathFns = p.resolve(process.cwd(), \"dist\", \"stubs\", \"withImport\", \"fns\");\r\n    const fns = require(pathFns);\r\n    fns.firstFn(config);\r\n})(config, injectState, logger, deferred.resolve, imposterState);",
+      "data": "Cannot set properties of undefined (setting 'body')",
+      "name": "Error",
+      "stack": "Error\n    at Object.from (C:\\Projetos\\sidilabs\\mock-server\\node_modules\\mountebank\\src\\util\\inherit.js:15:17)\n    at createError (C:\\Projetos\\sidilabs\\mock-server\\node_modules\\mountebank\\src\\util\\errors.js:10:26)\n    at Object.InjectionError (C:\\Projetos\\sidilabs\\mock-server\\node_modules\\mountebank\\src\\util\\errors.js:21:34)\n    at inject (C:\\Projetos\\sidilabs\\mock-server\\node_modules\\mountebank\\src\\models\\responseResolver.js:72:44)\n    at processResponse (C:\\Projetos\\sidilabs\\mock-server\\node_modules\\mountebank\\src\\models\\responseResolver.js:315:20)\n    at Object.resolve (C:\\Projetos\\sidilabs\\mock-server\\node_modules\\mountebank\\src\\models\\responseResolver.js:350:16)\n    at C:\\Projetos\\sidilabs\\mock-server\\node_modules\\mountebank\\src\\models\\imposter.js:169:33\n    at _fulfilled (C:\\Projetos\\sidilabs\\mock-server\\node_modules\\q\\q.js:854:54)\n    at C:\\Projetos\\sidilabs\\mock-server\\node_modules\\q\\q.js:883:30\n    at Promise.promise.promiseDispatch (C:\\Projetos\\sidilabs\\mock-server\\node_modules\\q\\q.js:816:13)"
+    }
+  ]
+}

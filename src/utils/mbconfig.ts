@@ -1,3 +1,5 @@
+import path from "path";
+
 export type Config = {
   mountebankUrl: string;
   mountebankPort: string;
@@ -7,14 +9,17 @@ export type Config = {
   memDB: string;
 };
 
-export const config: Config = {
-  mountebankUrl: "http://localhost",
-  mountebankPort: "2525",
-  apiTimeout: 500,
-  appUrl: "http://localhost:3000",
-  stubsFolder: "./src/stubs",
-  memDB: "__db__",
-};
+export const config: Config = (() => {
+  const stubsFolder = path.join(__dirname, "..", "stubs");
+  return {
+    mountebankUrl: "http://localhost",
+    mountebankPort: "2525",
+    apiTimeout: 500,
+    appUrl: "http://localhost:3000",
+    stubsFolder,
+    memDB: "__db__",
+  };
+})();
 
 export type ImposterDefaults = {
   port: number;

@@ -4,10 +4,10 @@
 //config.state: { initially empty shared state object, is global within all stubs of an imposter }
 
 import { ConfigInjection, StubCollection } from "../../@types";
+import path from "path";
 
 //only on response injection
 //config.callback(value) =>  for async requests
-
 const injectRequest = (config: ConfigInjection) => {
   function hasXMLProlog() {
     return config.request.body.indexOf("<?xml") === 0;
@@ -21,13 +21,19 @@ const injectRequest = (config: ConfigInjection) => {
 };
 
 const injectResponse = (config: ConfigInjection) => {
+  var _ = require("lodash");
+
+  const result = _.partition([1, 2, 3, 4], (n: number) => n % 2);
   config.state.demo = config.state.demo || { counter: 0 };
   config.state.demo.counter += 1;
   return {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ count: config.state.demo.counter }),
+    body: JSON.stringify({
+      count: config.state.demo.counter,
+      result,
+    }),
   };
 };
 

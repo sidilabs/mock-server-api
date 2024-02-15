@@ -74,7 +74,10 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
       const queryItem = query[fieldName][1];
       acc = {
         ...acc,
-        [fieldName]: typeof queryItem == "function" ? queryItem.toString() : JSON.stringify(queryItem),
+        [fieldName]: [
+          query[fieldName][0],
+          typeof queryItem == "function" ? queryItem.toString() : JSON.stringify(queryItem),
+        ],
       };
       return acc;
     }, {});
@@ -83,6 +86,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
   let __FIELDS__: FieldGeneratorMap = {}; /*"to be overwrited when called fillData";*/
   let __QUERY__: QueryFilterMap;
 
+  console.log(JSON.stringify(queryFields));
   const relation = {
     "###db###": db,
     "###state###": `${configApi.state}`,
@@ -132,7 +136,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(objResponse),
+      body: objResponse,
     };
   }
 
@@ -175,7 +179,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
         "Content-Type": "application/json",
       },
       statusCode: 201,
-      body: JSON.stringify(result),
+      body: result,
     };
   }
 
@@ -226,7 +230,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(result),
+      body: result,
     };
   }
 
@@ -256,7 +260,6 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
   }
 
   function injectList(config: ConfigInjection, injectState: any, logger: any, resolve: any, imposterState: any) {
-    const isDirect = JSON.parse("###direct###");
     const stateDefinition = {
       "###state###": {
         lastId: 0,
@@ -397,18 +400,11 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
 
     return {
       statusCode: 200,
-      headers: {
-        "Content-Type": "application/json",
-        ...(isDirect ? { "X-Total-Count": count } : {}),
+
+      body: {
+        list,
+        total: count,
       },
-      body: JSON.stringify(
-        isDirect
-          ? list
-          : {
-              list,
-              total: count,
-            }
-      ),
     };
   }
 
