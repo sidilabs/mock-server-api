@@ -7,14 +7,6 @@ export type Config = {
   appUrl: string;
   stubsFolder: string;
   memDB: string;
-  axios: {
-    timeout: {
-      clearImposter: number;
-      createImposter: number;
-      createStub: number;
-      loadStubData: number;
-    };
-  };
 };
 
 export const config: Config = (() => {
@@ -26,14 +18,6 @@ export const config: Config = (() => {
     appUrl: "http://localhost:3000",
     stubsFolder,
     memDB: "__db__",
-    axios: {
-      timeout: {
-        clearImposter: 1000,
-        createImposter: 500,
-        createStub: 1000,
-        loadStubData: 1000,
-      },
-    },
   };
 })();
 
@@ -52,7 +36,7 @@ export type ImposterDefaults = {
 export const imposter: ImposterDefaults = {
   port: 8090,
   protocol: "http",
-  name: "project-sample",
+  name: "project-custom",
   defaultResponse: {
     statusCode: 418,
     headers: {

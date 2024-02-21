@@ -4,18 +4,19 @@ import { loadStubModules, loadStubsApiData } from "./stubs";
 import { loadConfig, MockConfig } from "./utils";
 
 async function restartImposter({ config, imposter }: MockConfig) {
+  const mbconfig = loadConfig();
   const urlImposters = config.mountebankUrl + ":" + config.mountebankPort + "/imposters";
 
   try {
     await axios({
       method: "delete",
       url: urlImposters + "/" + imposter.port,
-      timeout: 1000,
+      timeout: mbconfig.config.axios.timeout.clearImposter,
     });
     await axios({
       method: "post",
       url: urlImposters,
-      timeout: 500,
+      timeout: mbconfig.config.axios.timeout.createImposter,
       data: imposter,
     });
     console.log("Imposter at " + imposter.port + " (re)started...");
@@ -27,12 +28,13 @@ async function restartImposter({ config, imposter }: MockConfig) {
 }
 
 async function saveStub({ config, imposter }: MockConfig, stub: string, data: StubData) {
+  const mbconfig = loadConfig();
   const urlImposters = config.mountebankUrl + ":" + config.mountebankPort + "/imposters";
   try {
     const response = await axios({
       method: "post",
       url: urlImposters + "/" + imposter.port + "/stubs",
-      timeout: 1000,
+      timeout: mbconfig.config.axios.timeout.createStub,
       data,
     });
     const status = response.status;
@@ -47,12 +49,13 @@ async function saveStub({ config, imposter }: MockConfig, stub: string, data: St
 }
 
 async function loadApiData({ config, imposter }: MockConfig, api: string, data: any[]) {
+  const mbconfig = loadConfig();
   const urlMockedApi = config.mountebankUrl + ":" + imposter.port;
   try {
     const response = await axios({
       method: "patch",
       url: urlMockedApi + api,
-      timeout: 1000,
+      timeout: mbconfig.config.axios.timeout.loadStubData,
       data,
     });
     const status = response.status;
@@ -95,6 +98,7 @@ export const init = async (configPathWithoutExtension?: string) => {
   await initializeApiData(config);
 };
 
+export type { Config, ImposterDefaults } from "./utils/mbconfig";
 export * from "./@types";
 export type { ConfigList, QueryFilterMap } from "./api-model/list-total";
 export * as queryFns from "./api-model/list-total/utils";

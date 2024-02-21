@@ -21,7 +21,6 @@ const loadConfig = (filePathWithoutExtension?: string) => {
   let hasFound = false;
   let extension = ".ts";
   let fullPath = filePathWithoutExtension ?? "mbconfig" + extension;
-  console.log("fullPath: " + fullPath);
   try {
     if (fs.existsSync(path.resolve(fullPath))) {
       hasFound = true;
@@ -37,14 +36,18 @@ const loadConfig = (filePathWithoutExtension?: string) => {
   if (hasFound) {
     fileconfig = require(path.resolve(fullPath));
   } else {
-    console.error("mbconfig.ts file not found, using default file");
-    if (fs.existsSync(path.resolve(__dirname, "mbconfig.ts"))) {
-      fileconfig = require(path.resolve(__dirname, "mbconfig.ts"));
-    } else {
+    if (fs.existsSync(path.resolve(process.cwd(), "dist", "mbconfig.js"))) {
+      fileconfig = require(path.resolve(process.cwd(), "dist", "mbconfig.js"));
+    } else if (fs.existsSync(path.resolve(process.cwd(), "mbconfig.js"))) {
+      fileconfig = require(path.resolve(process.cwd(), "mbconfig.js"));
+    } else if (fs.existsSync(path.resolve(__dirname, "mbconfig.js"))) {
       fileconfig = require(path.resolve(__dirname, "mbconfig.js"));
+    } else {
+      fileconfig = require(path.resolve(__dirname, "mbconfig.ts"));
     }
   }
-  return fileconfig as MockConfig;
+  const config = (fileconfig || {}) as MockConfig;
+  return config;
 };
 
 const responseExtendBehavior = (

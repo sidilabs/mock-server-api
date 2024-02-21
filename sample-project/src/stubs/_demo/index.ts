@@ -3,8 +3,7 @@
 //config.logger:  { info(), warn(), error() }
 //config.state: { initially empty shared state object, is global within all stubs of an imposter }
 
-import { ConfigInjection, StubCollection } from "../../@types";
-import path from "path";
+import type { ConfigInjection, StubCollection } from "mock-server-api";
 
 //only on response injection
 //config.callback(value) =>  for async requests
