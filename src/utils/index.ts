@@ -36,7 +36,6 @@ const loadConfig = (filePathWithoutExtension?: string) => {
   if (hasFound) {
     fileconfig = require(path.resolve(fullPath));
   } else {
-    process.cwd();
     if (fs.existsSync(path.resolve(process.cwd(), "dist", "mbconfig.js"))) {
       fileconfig = require(path.resolve(process.cwd(), "dist", "mbconfig.js"));
     } else if (fs.existsSync(path.resolve(process.cwd(), "mbconfig.js"))) {
