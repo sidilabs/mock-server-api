@@ -8,7 +8,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "mock": "mock"
+    "mock": "mock",
+    "mb": "mb"
   },
   "author": "",
   "license": "MIT",
@@ -19,11 +20,11 @@
   },
   "overrides": {
     "mountebank": {
-      "ejs": "^3.1.7" 
+      "ejs": "^3.1.7"
     },
     "nodemailer": "^6.9.9"
   },
   "dependencies": {
-    "mock-server-api": "file:../mock-server"
+    "mock-server-api": "^0.2.1"
   }
 }
