@@ -1,6 +1,6 @@
 {
   "name": "mock-server-api",
-  "version": "0.1.1",
+  "version": "0.2.2",
   "private": false,
   "author": {
     "name": "Thyago Machado Cassimiro"
@@ -18,7 +18,7 @@
     "mock": "ts-node src/start.ts",
     "premock:dist": "tsc",
     "mock:dist": "node dist/start.js",
-    "build": "tsc"
+    "build": "tsc --declaration"
   },
   "dependencies": {
     "axios": "^1.6.7"
