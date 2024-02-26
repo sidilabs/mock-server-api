@@ -3,9 +3,69 @@ import path from "path";
 
 import { packageBaseURL, extendModuleBehavior, MockConfig } from "../utils";
 
-import { ApiStub, StubCollection, StubsModule } from "../@types";
+import { ApiStub, ConfigInjection, Predicate, Response, StubCollection, StubsModule } from "../@types";
 import { initApi } from "../api-model";
 import { options } from "./cors";
+
+const fnRequireStr = ((config: any) => {
+  const p = require("path") as typeof path;
+  const arrPath = [process.cwd(), "dist", "stubs", "###PATH_REQUIRE###"];
+
+  const fnName = arrPath.pop() as string;
+  const pathFns = p.resolve(...arrPath);
+  delete require.cache[require.resolve(pathFns)];
+
+  const exported = require(pathFns);
+  return exported[fnName](config);
+}).toString();
+
+const loadInject = (predicate: { $inject?: string; inject?: string }) => {
+  if (predicate.$inject) {
+    predicate.inject = fnRequireStr.replace(
+      /"###PATH_REQUIRE###"/,
+      predicate.$inject
+        .split("/")
+        .map((p) => `"${p}"`)
+        .toString()
+    );
+  }
+};
+
+const loadRequirePredicates = (predicates: Predicate[]) => {
+  predicates.forEach((predicate) => {
+    loadInject(predicate);
+    if (predicate.and) {
+      loadRequirePredicates(predicate.and);
+    }
+    if (predicate.or) {
+      loadRequirePredicates(predicate.or);
+    }
+  });
+};
+
+const loadRequireResponse = (responses: Response[]) => {
+  responses.forEach((response) => {
+    if (response.$inject) {
+      loadInject(response);
+    }
+    if (response._behaviors?.$decorate) {
+      response._behaviors.decorate = fnRequireStr.replace(
+        /"###PATH_REQUIRE###"/,
+        response._behaviors.$decorate
+          .split("/")
+          .map((p) => `"${p}"`)
+          .toString()
+      );
+    }
+  });
+};
+
+const loadRequireStub = (stubs: StubCollection) => {
+  Object.entries(stubs).forEach(([key, { stub }]) => {
+    loadRequirePredicates(stub.predicates);
+    loadRequireResponse(stub.responses);
+  });
+};
 
 const loadStubs = (mockConfig: MockConfig) => {
   const { config, imposter } = mockConfig;
@@ -20,11 +80,14 @@ const loadStubs = (mockConfig: MockConfig) => {
     if (!apiStubMock.stubs) {
       return;
     }
+    let result: StubCollection;
     if (apiStubMock.baseUrl) {
-      packages.push([dirName, packageBaseURL(apiStubMock.baseUrl, apiStubMock.stubs)]);
+      result = packageBaseURL(apiStubMock.baseUrl, apiStubMock.stubs);
     } else {
-      packages.push([dirName, apiStubMock.stubs]);
+      result = apiStubMock.stubs;
     }
+    loadRequireStub(result);
+    packages.push([dirName, result]);
   });
   return Object.fromEntries(packages);
 };
