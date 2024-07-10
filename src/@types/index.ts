@@ -19,8 +19,13 @@ export type ConfigInjection = {
     info: (val: any, ...args: any[]) => void;
     warn: (val: any, ...args: any[]) => void;
     error: (val: any, ...args: any[]) => void;
+    scopePrefix: string;
+    withScope: string;
+    changeScope: string;
+    baseLogger: string;
   };
 };
+export type PathFunctionString = string;
 export type FunctionString = string;
 export type RegExpString = string;
 export type HttpMethod = "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "DELETE" | "PATCH";
@@ -53,6 +58,7 @@ export type Response = {
   };
   _behaviors?: Behavior;
   inject?: FunctionString;
+  run?: PathFunctionString;
 };
 
 export type Stub = {
@@ -65,7 +71,7 @@ export type StubData = {
 };
 
 export type StubCollection = {
-  [key: string]: StubData;
+  [key: string]: StubData | Stub;
 };
 
 export type StubsModule = {
@@ -87,6 +93,14 @@ export type ApiData<T> = {
 
 export type ApiCollection = {
   [key: string]: ApiData<any>;
+};
+
+export type FnData = {
+  run: string;
+};
+
+export type FnCollection = {
+  [key: string]: FnData;
 };
 
 export type ApiStub = {

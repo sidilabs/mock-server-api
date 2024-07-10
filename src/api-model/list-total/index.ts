@@ -407,7 +407,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
     };
   }
 
-  function injectPatch(config: ConfigInjection) {
+  function injectLoadData(config: ConfigInjection) {
     const stateDefinition = {
       "###state###": {
         lastId: 0,
@@ -538,9 +538,9 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
         ],
         responses: [
           {
-            inject: fillData(injectPatch.toString(), {
+            inject: fillData(injectLoadData.toString(), {
               ...relation,
-              "###api###": parseParams(configApi.api, "PATCH", configApi.config?.urlParams, true),
+              "###api###": parseParams("__data/" + configApi.api, "POST", configApi.config?.urlParams, true),
             }),
           },
         ],

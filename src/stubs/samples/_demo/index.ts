@@ -3,7 +3,7 @@
 //config.logger:  { info(), warn(), error() }
 //config.state: { initially empty shared state object, is global within all stubs of an imposter }
 
-import { ConfigInjection, StubCollection } from "../../@types";
+import { ConfigInjection, StubCollection } from "../../../@types";
 import path from "path";
 
 //only on response injection
@@ -66,6 +66,7 @@ const injectResponse3 = (config: ConfigInjection) => {
 };
 
 function injectAllConfig(config: any) {
+  //ConfigInjection
   config.response.statusCode = 240;
   config.response.headers = { "Content-Type": "application/json" };
   config.response.body = { body: { ...(config.response.body as {}) }, request: config.request };

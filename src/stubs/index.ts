@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-import { packageBaseURL, extendModuleBehavior, MockConfig } from "../utils";
+import { packageBaseURL, extendModuleBehavior, MockConfig, injectRunFunction } from "../utils";
 
 import { ApiStub, StubCollection, StubsModule } from "../@types";
 import { initApi } from "../api-model";
@@ -21,9 +21,12 @@ const loadStubs = (mockConfig: MockConfig) => {
       return;
     }
     if (apiStubMock.baseUrl) {
-      packages.push([dirName, packageBaseURL(apiStubMock.baseUrl, apiStubMock.stubs)]);
+      packages.push([
+        dirName,
+        injectRunFunction(packageBaseURL(apiStubMock.baseUrl, apiStubMock.stubs), mockConfig.config.stubsFolder),
+      ]);
     } else {
-      packages.push([dirName, apiStubMock.stubs]);
+      packages.push([dirName, injectRunFunction(apiStubMock.stubs, mockConfig.config.stubsFolder)]);
     }
   });
   return Object.fromEntries(packages);

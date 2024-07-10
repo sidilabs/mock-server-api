@@ -8,6 +8,7 @@ import {
   Stub,
   ConfigInjection,
   StubsModule,
+  StubData,
 } from "../@types";
 
 import fs from "fs";
@@ -65,7 +66,11 @@ const responseExtendBehavior = (
         oldDecorator = response._behaviors.decorate;
       }
     }
+
     let newBehavior = { ...oldBehavior, ...behavior };
+    if (oldBehavior.wait) {
+      newBehavior.wait = oldBehavior.wait;
+    }
     let addIdentifier = (config: ConfigInjection) => {
       const headers = config.response.headers || {};
       config.response.headers = {
@@ -89,6 +94,14 @@ const stubExtendBehavior = (stub: Stub, decorate: FunctionString, behavior: Beha
   }
 };
 
+export const stub = (d: StubData | Stub) => {
+  if ((d as StubData).stub) {
+    return (d as StubData).stub;
+  } else {
+    return d as Stub;
+  }
+};
+
 const packageExtendBehavior = (
   packageStubs: StubCollection,
   decorate: FunctionString,
@@ -97,7 +110,7 @@ const packageExtendBehavior = (
 ) => {
   for (let pkgItem in packageStubs) {
     const data = packageStubs[pkgItem];
-    stubExtendBehavior(data.stub, decorate, behavior, pkgName && pkgName + ":" + pkgItem);
+    stubExtendBehavior(stub(data), decorate, behavior, pkgName && pkgName + ":" + pkgItem);
   }
 };
 
@@ -123,12 +136,51 @@ const predicateBaseURL = (url: string, predicateObj: Predicate, n = 0) => {
 const packageBaseURL = (url: string, packageStubs: StubCollection) => {
   for (let i in packageStubs) {
     const data = packageStubs[i];
-    for (let r in data.stub.predicates) {
-      let predicate = data.stub.predicates[r];
+    for (let r in stub(data).predicates) {
+      let predicate = stub(data).predicates[r];
       predicateBaseURL(url, predicate);
     }
   }
   return packageStubs;
+};
+
+export const injectRunFunction = (packageStubs: StubCollection, baseDirectory: string) => {
+  for (let i in packageStubs) {
+    const data = packageStubs[i];
+    for (let r in stub(data).responses) {
+      let response = stub(data).responses[r];
+      responseInjectRunFunction(response, baseDirectory);
+    }
+  }
+  return packageStubs;
+};
+
+const responseInjectRunFunction = (responseObj: Response, baseDirectory: string) => {
+  if (!responseObj.run) return;
+
+  const injectResponseRequire = (config: ConfigInjection) => {
+    const p = require("path") as typeof path;
+    const runArr = ("###PATH###" as string).split(".");
+    const fnName = runArr[1];
+
+    const pathBase = "###BASE###";
+    const fnPath = p.join(pathBase, runArr[0]);
+
+    if (!config.state["__requires"]) {
+      config.state["__requires"] = [];
+    }
+    config.state["__requires"].push(fnPath);
+
+    delete require.cache[fnPath];
+    const fileRun = require(fnPath);
+    return fileRun[fnName](config);
+  };
+
+  const r = injectResponseRequire.toString().replace("###BASE###", baseDirectory.replace(/\\/g, "\\\\"));
+  const injectResponse = r.replace("###PATH###", responseObj.run);
+
+  delete responseObj.run;
+  responseObj.inject = injectResponse;
 };
 
 const extendModuleBehavior = (stubsModule: StubsModule, config: Config, imposter: ImposterDefaults) => {

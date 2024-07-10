@@ -1,23 +1,34 @@
-import path from "path";
 import type { ConfigInjection, StubCollection } from "mock-server-api";
-import type { firstFn as firstFn } from "./fns";
 
-const injectResponseRequire = (config: ConfigInjection) => {
-  const p = require("path") as typeof path;
-  const pathFns = p.resolve(process.cwd(), "dist", "stubs", "withImport", "fns");
-  delete require.cache[require.resolve(pathFns)];
+const data = {
+  a: 2,
+  b: "c",
+  c: [1] as any[],
+};
 
-  const fns = require(pathFns) as { firstFn: typeof firstFn };
-  config.logger.error(JSON.stringify(Object.keys(fns)));
+export const innerFn = (config: ConfigInjection) => {
+  config.logger.warn(JSON.stringify(data));
 
-  return fns.firstFn(config);
+  data.a = data.a + 1;
+  data.b = data.b + "b";
+  data.c = [...data.c, data.a];
+
+  return { body: config.request.path + ":INNER" };
 };
 
 export const stubs: StubCollection = {
   withImport: {
-    stub: {
-      predicates: [{ equals: { method: "GET", path: "/_demo/withRequire" } }],
-      responses: [{ inject: injectResponseRequire.toString() }],
-    },
+    predicates: [{ equals: { method: "GET", path: "/_demo/withImport" } }],
+    responses: [
+      {
+        run: "/withImport/fns.firstFn",
+        _behaviors: {
+          wait: 1000,
+        },
+      },
+      {
+        run: "/withImport.innerFn",
+      },
+    ],
   },
 };

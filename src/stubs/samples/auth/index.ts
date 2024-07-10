@@ -1,6 +1,6 @@
-import { ConfigInjection, StubCollection } from "../../@types";
-import { packageBaseURL } from "../../utils";
-import { ADMIN } from "../../utils/constants";
+import { ConfigInjection, StubCollection } from "../../../@types";
+import { packageBaseURL } from "../../../utils";
+import { ADMIN } from "../../../utils/constants";
 
 import permissionList from "./permissionList.json";
 

@@ -1,9 +1,9 @@
 import projectList from "./projectList.json";
 import projectModuleList from "./projectModuleList.json";
 
-import { ApiCollection } from "../../@types";
-import { ConfigList } from "../../api-model/list-total";
-import { sort, offset } from "../../api-model/list-total/utils";
+import { ApiCollection } from "../../../@types";
+import { ConfigList } from "../../../api-model/list-total";
+import { sort, offset } from "../../../api-model/list-total/utils";
 
 export const apis: ApiCollection = {
   project: {
