@@ -1,7 +1,7 @@
 import axios from "axios";
-import { StubData } from "./@types";
+import { Stub, StubData } from "./@types";
 import { loadStubModules, loadStubsApiData } from "./stubs";
-import { loadConfig, MockConfig } from "./utils";
+import { loadConfig, MockConfig, stub } from "./utils";
 
 async function restartImposter({ config, imposter }: MockConfig) {
   const mbconfig = loadConfig();
@@ -27,7 +27,7 @@ async function restartImposter({ config, imposter }: MockConfig) {
   }
 }
 
-async function saveStub({ config, imposter }: MockConfig, stub: string, data: StubData) {
+async function saveStub({ config, imposter }: MockConfig, stub: string, data: Stub) {
   const mbconfig = loadConfig();
   const urlImposters = config.mountebankUrl + ":" + config.mountebankPort + "/imposters";
   try {
@@ -35,7 +35,7 @@ async function saveStub({ config, imposter }: MockConfig, stub: string, data: St
       method: "post",
       url: urlImposters + "/" + imposter.port + "/stubs",
       timeout: mbconfig.config.axios.timeout.createStub,
-      data,
+      data: { stub: data },
     });
     const status = response.status;
     if (status >= 200 && status < 300) {
@@ -53,8 +53,8 @@ async function loadApiData({ config, imposter }: MockConfig, api: string, data: 
   const urlMockedApi = config.mountebankUrl + ":" + imposter.port;
   try {
     const response = await axios({
-      method: "patch",
-      url: urlMockedApi + api,
+      method: "post",
+      url: "__data/" + urlMockedApi + api,
       timeout: mbconfig.config.axios.timeout.loadStubData,
       data,
     });
@@ -74,7 +74,7 @@ const createStubs = async (mockConfig: MockConfig) => {
   for (const spNames in stubsModule) {
     const stubsCollection = stubsModule[spNames];
     for (const sNames in stubsCollection) {
-      const stubData = stubsCollection[sNames];
+      const stubData = stub(stubsCollection[sNames]);
       await saveStub(mockConfig, `${spNames}:${sNames}`, stubData);
     }
   }

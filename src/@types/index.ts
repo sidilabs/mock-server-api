@@ -19,8 +19,13 @@ export type ConfigInjection = {
     info: (val: any, ...args: any[]) => void;
     warn: (val: any, ...args: any[]) => void;
     error: (val: any, ...args: any[]) => void;
+    scopePrefix: string;
+    withScope: string;
+    changeScope: string;
+    baseLogger: string;
   };
 };
+export type PathFunctionString = string;
 export type FunctionString = string;
 export type RegExpString = string;
 export type HttpMethod = "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "DELETE" | "PATCH";
@@ -30,21 +35,17 @@ export type Json = { [key: string]: Primitive | Primitive[] | Json | Json[] };
 
 export type PredicateDef = { method: HttpMethod; path?: string | RegExpString; query?: { [key: string]: string } };
 
-export type StringRefToFunction = string;
-
 export type Predicate = {
   equals?: PredicateDef;
   matches?: PredicateDef;
   or?: Predicate[];
   and?: Predicate[];
   inject?: FunctionString;
-  $inject?: StringRefToFunction; // [folder-Path-inside-Stubs]/fileName/functionNameExported - it overwrites inject
 };
 
 export type Behavior = {
   wait?: number | FunctionString;
   decorate?: FunctionString;
-  $decorate?: StringRefToFunction; // [folder-Path-inside-Stubs]/fileName/functionNameExported - it overwrites decorate
 };
 
 export type Response = {
@@ -57,7 +58,7 @@ export type Response = {
   };
   _behaviors?: Behavior;
   inject?: FunctionString;
-  $inject?: StringRefToFunction; // [folder-Path-inside-Stubs]/fileName/functionNameExported - it overwrites inject
+  run?: PathFunctionString;
 };
 
 export type Stub = {
@@ -70,7 +71,7 @@ export type StubData = {
 };
 
 export type StubCollection = {
-  [key: string]: StubData;
+  [key: string]: StubData | Stub;
 };
 
 export type StubsModule = {
@@ -92,6 +93,14 @@ export type ApiData<T> = {
 
 export type ApiCollection = {
   [key: string]: ApiData<any>;
+};
+
+export type FnData = {
+  run: string;
+};
+
+export type FnCollection = {
+  [key: string]: FnData;
 };
 
 export type ApiStub = {
