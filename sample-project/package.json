@@ -7,6 +7,7 @@
     "/dist"
   ],
   "scripts": {
+    "build": "tsc",
     "premock": "tsc",
     "mock": "mock",
     "mb": "mb --allowInjection"
