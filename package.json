@@ -1,10 +1,11 @@
 {
   "name": "mock-server-api",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "private": false,
   "author": {
     "name": "Thyago Machado Cassimiro"
   },
+  "license":"MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
