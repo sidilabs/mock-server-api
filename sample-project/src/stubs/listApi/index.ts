@@ -1,8 +1,7 @@
-import { ApiCollection } from "../../../@types";
+import { ApiCollection } from "../../../../dist";
 
 export const apis: ApiCollection = {
   sample: {
-    model: "list-total",
     state: "entity",
     api: "/_demo/api",
     data: [

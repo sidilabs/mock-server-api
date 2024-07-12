@@ -526,26 +526,6 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
         ],
       },
     },
-    patch: {
-      stub: {
-        predicates: [
-          {
-            matches: {
-              method: "PATCH",
-              path: parseParams(configApi.api, "PATCH", configApi.config?.urlParams) + "/?$",
-            },
-          },
-        ],
-        responses: [
-          {
-            inject: fillData(injectLoadData.toString(), {
-              ...relation,
-              "###api###": parseParams("__data/" + configApi.api, "POST", configApi.config?.urlParams, true),
-            }),
-          },
-        ],
-      },
-    },
   };
 
   let stubsFiltered = stubs;
@@ -555,7 +535,6 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
       const nKey = key.toLowerCase();
       stubsFiltered[nKey] = stubs[nKey];
     });
-    stubsFiltered.patch = stubs.patch;
   }
 
   return { ["(api)" + name]: stubsFiltered };

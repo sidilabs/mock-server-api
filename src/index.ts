@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Stub, StubData } from "./@types";
+import { ConfigInjection, Stub, StubData } from "./@types";
 import { loadStubModules, loadStubsApiData } from "./stubs";
 import { loadConfig, MockConfig, stub } from "./utils";
 
@@ -48,24 +48,24 @@ async function saveStub({ config, imposter }: MockConfig, stub: string, data: St
   }
 }
 
-async function loadApiData({ config, imposter }: MockConfig, api: string, data: any[]) {
+async function loadStateData({ config, imposter }: MockConfig, state: string, data: any[]) {
   const mbconfig = loadConfig();
   const urlMockedApi = config.mountebankUrl + ":" + imposter.port;
   try {
     const response = await axios({
       method: "post",
-      url: "__data/" + urlMockedApi + api,
+      url: urlMockedApi + "/__state?state=" + state + "&db=" + config.memDB,
       timeout: mbconfig.config.axios.timeout.loadStubData,
       data,
     });
     const status = response.status;
     if (status >= 200 && status < 300) {
-      console.log(`Loaded api: ${api}`);
+      console.log(`Loaded api: ${state}`);
     } else {
-      console.error(`Error loading data: ${api}`, response);
+      console.error(`Error loading data: ${state}`, response);
     }
   } catch (e) {
-    console.error(`Error loading data: ${api}`, e);
+    console.error(`Error loading data: ${state}`, e);
   }
 }
 
@@ -80,21 +80,129 @@ const createStubs = async (mockConfig: MockConfig) => {
   }
 };
 
+const createRequiresClearCache = async (mockConfig: MockConfig) => {
+  //create stub to set state data
+  let stubSet = {
+    predicates: [
+      {
+        matches: {
+          method: "GET",
+          path: "/__requires/clear$",
+          query: {
+            db: ".+",
+          },
+        },
+      },
+    ],
+    responses: [
+      {
+        inject: function injectRequiresClearCache(config: ConfigInjection) {
+          let cleared = false;
+          const db = config.request.query.db;
+
+          if (config.state["__requires"]?.[db]) {
+            Object.keys(config.state["__requires"][db]).forEach((path) => {
+              delete require.cache[path];
+            });
+            cleared = true;
+          }
+          const __requires = config.state["__requires"]?.[db] || {};
+          if (!config.state["__requires"]) {
+            config.state["__requires"] = {};
+          }
+          config.state["__requires"][db] = {};
+          return {
+            statusCode: 200,
+            body: __requires,
+          };
+        }.toString(),
+      },
+    ],
+  } as Stub;
+  try {
+    await saveStub(mockConfig, `__state:set`, stubSet);
+  } catch {}
+};
+
+const runRequiresClearCache = async (mockConfig: MockConfig) => {
+  try {
+    await new Promise((resolve) => {
+      setTimeout(() => resolve(true), 500);
+    });
+
+    const urlMockedApi = mockConfig.config.mountebankUrl + ":" + mockConfig.imposter.port;
+    await axios({
+      method: "get",
+      url: urlMockedApi + "/__requires/clear?db=" + mockConfig.config.memDB,
+    });
+  } catch {}
+};
+
 const initializeApiData = async (mockConfig: MockConfig) => {
   await new Promise((resolve, reject) => {
     setTimeout(() => resolve(true), 500);
   });
   const initialApisData = loadStubsApiData(mockConfig);
-  for (var index in initialApisData) {
-    const apiData = initialApisData[index];
-    loadApiData(mockConfig, apiData.api, apiData.data);
+
+  if (initialApisData.length > 0) {
+    //create stub to set state data
+    let stubSet = {
+      predicates: [
+        {
+          matches: {
+            method: "POST",
+            path: "/__state$",
+            query: { db: ".+", state: ".+" },
+          },
+        },
+      ],
+      responses: [
+        {
+          inject: function injectLoadData(config: ConfigInjection) {
+            const { db, state, id } = config.request.query;
+
+            const stateDefinition = {
+              [state]: {
+                lastId: 0,
+                data: [],
+              },
+            };
+            if (!config.state[db]) {
+              config.state[db] = stateDefinition;
+            } else if (!config.state[db][state]) {
+              config.state[db][state] = stateDefinition[state];
+            }
+            const stateData = config.state[db][state];
+            const jsonDataArray: any[] = JSON.parse(config.request.body);
+            stateData.lastId = jsonDataArray.at(-1)[id || "id"];
+            stateData.data = jsonDataArray;
+            return {
+              statusCode: 204,
+            };
+          }.toString(),
+        },
+      ],
+    } as Stub;
+    await saveStub(mockConfig, `__state:set`, stubSet);
+    await new Promise((resolve, _) => {
+      setTimeout(() => resolve(true), 500);
+    });
   }
+  //({ config, imposter }: MockConfig, stub: string, data: Stub
+
+  initialApisData.forEach((apiData) => {
+    loadStateData(mockConfig, apiData.state, apiData.data);
+  });
 };
 
 export const init = async (configPathWithoutExtension?: string) => {
   const config = loadConfig(configPathWithoutExtension);
+  //always try to call the clear cache
+  await runRequiresClearCache(config);
   await restartImposter(config);
+  await createRequiresClearCache(config);
   await createStubs(config);
+
   await initializeApiData(config);
 };
 

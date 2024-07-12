@@ -23,10 +23,10 @@ const loadStubs = (mockConfig: MockConfig) => {
     if (apiStubMock.baseUrl) {
       packages.push([
         dirName,
-        injectRunFunction(packageBaseURL(apiStubMock.baseUrl, apiStubMock.stubs), mockConfig.config.stubsFolder),
+        injectRunFunction(packageBaseURL(apiStubMock.baseUrl, apiStubMock.stubs), mockConfig.config),
       ]);
     } else {
-      packages.push([dirName, injectRunFunction(apiStubMock.stubs, mockConfig.config.stubsFolder)]);
+      packages.push([dirName, injectRunFunction(apiStubMock.stubs, mockConfig.config)]);
     }
   });
   return Object.fromEntries(packages);
@@ -59,7 +59,7 @@ export const loadStubsApiData = (mockConfig: MockConfig) => {
   const dirs: string[] = fs
     .readdirSync(directory)
     .filter((file: string) => fs.lstatSync(path.resolve(directory, file)).isDirectory());
-  let apisData: { api: string; data: any[] }[] = [];
+
   let priorities: { [key: string]: any[] } = { 1: [] };
   dirs.forEach((dirName: string) => {
     const apiStubMock: ApiStub = require(path.resolve(directory, dirName));
@@ -70,15 +70,16 @@ export const loadStubsApiData = (mockConfig: MockConfig) => {
       if (apiConfig.data) {
         if (apiConfig.dataPriority) {
           priorities[apiConfig.dataPriority] = priorities[apiConfig.dataPriority] || [];
-          priorities[apiConfig.dataPriority].push({ api: apiConfig.dataApi || apiConfig.api, data: apiConfig.data });
+          priorities[apiConfig.dataPriority].push({ state: apiConfig.state, data: apiConfig.data });
         } else {
-          priorities[1].push({ api: apiConfig.dataApi || apiConfig.api, data: apiConfig.data });
+          priorities[1].push({ state: apiConfig.state, data: apiConfig.data });
         }
       }
     });
   });
+  let apisData: { state: string; data: any[] }[] = [];
   Object.keys(priorities).forEach((key) => {
-    apisData = [...apisData, ...priorities[key]];
+    apisData = [...priorities[key]];
   });
   return apisData;
 };

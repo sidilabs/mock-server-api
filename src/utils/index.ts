@@ -144,18 +144,18 @@ const packageBaseURL = (url: string, packageStubs: StubCollection) => {
   return packageStubs;
 };
 
-export const injectRunFunction = (packageStubs: StubCollection, baseDirectory: string) => {
+export const injectRunFunction = (packageStubs: StubCollection, config: { stubsFolder: string; memDB: string }) => {
   for (let i in packageStubs) {
     const data = packageStubs[i];
     for (let r in stub(data).responses) {
       let response = stub(data).responses[r];
-      responseInjectRunFunction(response, baseDirectory);
+      responseInjectRunFunction(response, config);
     }
   }
   return packageStubs;
 };
 
-const responseInjectRunFunction = (responseObj: Response, baseDirectory: string) => {
+const responseInjectRunFunction = (responseObj: Response, config: { stubsFolder: string; memDB: string }) => {
   if (!responseObj.run) return;
 
   const injectResponseRequire = (config: ConfigInjection) => {
@@ -163,21 +163,24 @@ const responseInjectRunFunction = (responseObj: Response, baseDirectory: string)
     const runArr = ("###PATH###" as string).split(".");
     const fnName = runArr[1];
 
+    const db = "###DB###";
     const pathBase = "###BASE###";
     const fnPath = p.join(pathBase, runArr[0]);
 
     if (!config.state["__requires"]) {
-      config.state["__requires"] = [];
+      config.state["__requires"] = {};
     }
-    config.state["__requires"].push(fnPath);
+    if (!config.state["__requires"][db]) {
+      config.state["__requires"][db] = {};
+    }
+    config.state["__requires"][db][fnPath] = 1;
 
-    delete require.cache[fnPath];
     const fileRun = require(fnPath);
     return fileRun[fnName](config);
   };
 
-  const r = injectResponseRequire.toString().replace("###BASE###", baseDirectory.replace(/\\/g, "\\\\"));
-  const injectResponse = r.replace("###PATH###", responseObj.run);
+  const r = injectResponseRequire.toString().replace("###BASE###", config.stubsFolder.replace(/\\/g, "\\\\"));
+  const injectResponse = r.replace("###PATH###", responseObj.run).replace("###DB###", config.memDB);
 
   delete responseObj.run;
   responseObj.inject = injectResponse;
