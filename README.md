@@ -43,7 +43,6 @@ To use this project the easiest way is to use the `/sample-project` as it alread
   
 ## Run steps using 
 
-**(Non Docker)**
 - On the command line run: `npm run mb`
 
 - On an new command line run: `npm run mock`
@@ -93,3 +92,31 @@ There are some options for query filters they are:
 - queryPriority: set the priority of an query, if the priority is greater than 9 that query will be executed after extract the list length, default value is 5.
 
 - `list-total/utils.ts` there are 2 functions that could be used to add query function: `sort` = used to sort the result list,  `offset` = used for pagination, a sample of use is on `/mocks/stubs/projects`
+
+
+# THE NEWEST SUPER COOL WAY TO CREATE RESPONSES:
+
+On the sample-project there is this folder withImport with this `StubCollection`:
+
+<pre>
+ {
+  withImport: {
+    predicates: [{ equals: { method: "GET", path: "/_demo/withImport" } }],
+    responses: [
+      {
+        run: "/withImport/fns.firstFn",
+        _behaviors: {
+          wait: 1000,
+        },
+      },
+      {
+        run: "/withImport.innerFn",
+      },
+    ],
+  },
+};
+</pre>
+
+The main point is to use an exported function inside the stub response, it will only need to pass the path to the function on the following format:
+`"/pathToFolder/InsideStubs/Location/FileName.functionExported"`
+
