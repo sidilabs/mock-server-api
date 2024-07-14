@@ -1,9 +1,7 @@
 import projectList from "./projectList.json";
 import projectModuleList from "./projectModuleList.json";
 
-import { ApiCollection } from "../../../@types";
-import { ConfigList } from "../../../api-model/list-total";
-import { sort, offset } from "../../../api-model/list-total/utils";
+import { ApiCollection, ConfigList, queryFns } from "mock-server-api";
 
 export const apis: ApiCollection = {
   project: {
@@ -23,8 +21,8 @@ export const apis: ApiCollection = {
         },
       },
       query: {
-        sort: [6, sort],
-        offset: [10, offset],
+        sort: [6, queryFns.sort],
+        offset: [10, queryFns.offset],
       },
     } as ConfigList,
   },

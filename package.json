@@ -1,9 +1,15 @@
 {
   "name": "mock-server-api",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "private": false,
   "author": {
-    "name": "Thyago Machado Cassimiro"
+    "name": "Thyago Machado Cassimiro",
+    "email": "t.cassimiro@sidi.com.br",
+    "url": "https://github.com/ThyagoMC"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sidilabs/mock-server-api.git"
   },
   "license":"MIT",
   "main": "dist/index.js",

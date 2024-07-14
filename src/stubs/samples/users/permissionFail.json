@@ -1,7 +1,0 @@
-{
-  "error": {
-    "status": "UNAUTHORIZED",
-    "code": "Unauthorized",
-    "message": "Missing request attribute 'authorization' of type String"
-  }
-}

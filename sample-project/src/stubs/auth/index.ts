@@ -1,6 +1,5 @@
-import { ConfigInjection, StubCollection } from "../../../@types";
-import { packageBaseURL } from "../../../utils";
-import { ADMIN } from "../../../utils/constants";
+import { ConfigInjection, StubCollection, packageBaseURL } from "mock-server-api";
+import { ADMIN } from "../../constants";
 
 import permissionList from "./permissionList.json";
 

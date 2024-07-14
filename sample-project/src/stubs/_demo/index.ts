@@ -3,8 +3,7 @@
 //config.logger:  { info(), warn(), error() }
 //config.state: { initially empty shared state object, is global within all stubs of an imposter }
 
-import { ConfigInjection, StubCollection } from "../../../@types";
-import path from "path";
+import { ConfigInjection, StubCollection } from "mock-server-api";
 
 //only on response injection
 //config.callback(value) =>  for async requests
@@ -34,16 +33,6 @@ const injectResponse = (config: ConfigInjection) => {
       count: config.state.demo.counter,
       result,
     }),
-  };
-};
-
-const injectResponseOverwrite = (config: ConfigInjection) => {
-  config.state.killState = 1;
-  return {
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(config.state),
   };
 };
 
@@ -94,12 +83,6 @@ export const stubs: StubCollection = {
     stub: {
       predicates: [{ equals: { method: "GET", path: "/_demo/counter" } }],
       responses: [{ inject: injectResponse.toString() }],
-    },
-  },
-  killState: {
-    stub: {
-      predicates: [{ equals: { method: "GET", path: "/_demo/killState" } }],
-      responses: [{ inject: injectResponseOverwrite.toString() }],
     },
   },
   injectRequest: {

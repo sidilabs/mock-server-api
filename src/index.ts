@@ -206,6 +206,7 @@ export const init = async (configPathWithoutExtension?: string) => {
   await initializeApiData(config);
 };
 
+export { packageBaseURL } from "./utils";
 export type { Config, ImposterDefaults } from "./utils/mbconfig";
 export * from "./@types";
 export type { ConfigList, QueryFilterMap } from "./api-model/list-total";
