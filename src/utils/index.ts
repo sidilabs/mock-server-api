@@ -144,7 +144,7 @@ const packageBaseURL = (url: string, packageStubs: StubCollection) => {
   return packageStubs;
 };
 
-export const injectRunFunction = (packageStubs: StubCollection, config: { stubsFolder: string; memDB: string }) => {
+export const injectRunFunction = (packageStubs: StubCollection, config: Config) => {
   for (let i in packageStubs) {
     const data = packageStubs[i];
     for (let r in stub(data).responses) {
@@ -155,7 +155,7 @@ export const injectRunFunction = (packageStubs: StubCollection, config: { stubsF
   return packageStubs;
 };
 
-const responseInjectRunFunction = (responseObj: Response, config: { stubsFolder: string; memDB: string }) => {
+const responseInjectRunFunction = (responseObj: Response, config: Config) => {
   if (!responseObj.run) return;
 
   const injectResponseRequire = (config: ConfigInjection) => {
@@ -187,25 +187,25 @@ const responseInjectRunFunction = (responseObj: Response, config: { stubsFolder:
 };
 
 const extendModuleBehavior = (stubsModule: StubsModule, config: Config, imposter: ImposterDefaults) => {
-  let headers: { [key: string]: string | boolean | number } = { ...imposter.defaultResponse.headers };
-  delete headers["Mountebank-Id"];
-  let strHeaders = JSON.stringify(headers);
+  let refInject = { run: config.globalRun, inject: "()=>{}" };
+  responseInjectRunFunction(refInject, config);
 
-  const decorate = ((config: ConfigInjection) => {
-    config.response.statusCode = config.response.statusCode || 200;
-    const headers = config.response.headers || {};
-    let a = Math.floor(Math.random() * 10);
-    let b = Math.floor(Math.random() * 10);
-    let c = Math.floor(Math.random() * 10);
-    const defaultHeaders: any = "#####";
-    config.response.headers = {
-      ...headers,
-      ...defaultHeaders,
-      _csrf: `${a}${b}${c}a001e-1c45-4c33-853f-643f9bbb0bad`,
-    };
-  })
-    .toString()
-    .replace("'#####'", strHeaders);
+  const decorate = refInject.inject;
+  // ((config: ConfigInjection) => {
+  //   config.response.statusCode = config.response.statusCode || 200;
+  //   const headers = config.response.headers || {};
+  //   let a = Math.floor(Math.random() * 10);
+  //   let b = Math.floor(Math.random() * 10);
+  //   let c = Math.floor(Math.random() * 10);
+  //   const defaultHeaders: any = "#####";
+  //   config.response.headers = {
+  //     ...headers,
+  //     ...defaultHeaders,
+  //     _csrf: `${a}${b}${c}a001e-1c45-4c33-853f-643f9bbb0bad`,
+  //   };
+  // })
+  //   .toString()
+  //   .replace("'#####'", strHeaders);
 
   for (const name in stubsModule) {
     const packageStubs: StubCollection = stubsModule[name];

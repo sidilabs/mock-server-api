@@ -11,12 +11,12 @@ async function restartImposter({ config, imposter }: MockConfig) {
     await axios({
       method: "delete",
       url: urlImposters + "/" + imposter.port,
-      timeout: mbconfig.config.axios.timeout.clearImposter,
+      timeout: mbconfig.config.axios?.timeout?.clearImposter,
     });
     await axios({
       method: "post",
       url: urlImposters,
-      timeout: mbconfig.config.axios.timeout.createImposter,
+      timeout: mbconfig.config.axios?.timeout?.createImposter,
       data: imposter,
     });
     console.log("Imposter at " + imposter.port + " (re)started...");
@@ -34,7 +34,7 @@ async function saveStub({ config, imposter }: MockConfig, stub: string, data: St
     const response = await axios({
       method: "post",
       url: urlImposters + "/" + imposter.port + "/stubs",
-      timeout: mbconfig.config.axios.timeout.createStub,
+      timeout: mbconfig.config.axios?.timeout?.createStub,
       data: { stub: data },
     });
     const status = response.status;
@@ -55,7 +55,7 @@ async function loadStateData({ config, imposter }: MockConfig, state: string, da
     const response = await axios({
       method: "post",
       url: urlMockedApi + "/__state?state=" + state + "&db=" + config.memDB,
-      timeout: mbconfig.config.axios.timeout.loadStubData,
+      timeout: mbconfig.config.axios?.timeout?.loadStubData,
       data,
     });
     const status = response.status;

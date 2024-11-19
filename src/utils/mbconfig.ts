@@ -15,6 +15,7 @@ export type Config = {
       loadStubData: number;
     };
   };
+  globalRun?: string;
 };
 
 export const config: Config = (() => {

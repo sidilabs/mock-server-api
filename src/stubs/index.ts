@@ -5,7 +5,6 @@ import { packageBaseURL, extendModuleBehavior, MockConfig, injectRunFunction } f
 
 import { ApiStub, StubCollection, StubsModule } from "../@types";
 import { initApi } from "../api-model";
-import { options } from "./cors";
 
 const loadStubs = (mockConfig: MockConfig) => {
   const { config, imposter } = mockConfig;
@@ -35,6 +34,7 @@ const loadStubs = (mockConfig: MockConfig) => {
 const loadApis = (mockConfig: MockConfig) => {
   const { config } = mockConfig;
   const directory = config.stubsFolder;
+  console.log(directory);
   const dirs: string[] = fs
     .readdirSync(directory)
     .filter((file: string) => fs.lstatSync(path.resolve(directory, file)).isDirectory());
@@ -49,7 +49,7 @@ const loadApis = (mockConfig: MockConfig) => {
 export const loadStubModules = (mockConfig: MockConfig) => {
   const { config, imposter } = mockConfig;
   return {
-    ...extendModuleBehavior({ ...loadApis(mockConfig), ...loadStubs(mockConfig), cors: { options } }, config, imposter),
+    ...extendModuleBehavior({ ...loadApis(mockConfig), ...loadStubs(mockConfig) }, config, imposter),
   } as StubsModule;
 };
 
