@@ -54,8 +54,8 @@ const loadConfig = (filePathWithoutExtension?: string) => {
 const responseExtendBehavior = (
   response: Response,
   decorate: FunctionString,
-  behavior: Behavior = {},
-  identifier = ""
+  behavior: Behavior = {}, // { wait: ... }
+  identifier = "defaultId"
 ) => {
   if (response) {
     let addIdentifier = (config: ConfigInjection) => {
@@ -64,8 +64,9 @@ const responseExtendBehavior = (
         "Mountebank-Id": "####",
         ...headers,
       };
+      return config.response;
     };
-    let addId = identifier ? addIdentifier.toString().replace("####", identifier) : "()=>{}";
+    let addId = addIdentifier.toString().replace("####", identifier);
 
     if (!response.behaviors) {
       response.behaviors = [];

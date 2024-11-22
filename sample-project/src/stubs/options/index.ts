@@ -10,13 +10,14 @@ export const cors = (config: any) => {
   let c = Math.floor(Math.random() * 10);
   config.response.headers = {
     ...defaultHeaders,
-    _csrf: `${a}${b}${c}a001e-1c45-4c33-853f-643f9bbb0bad`,
+    _csrf: `${a}${b}${c}-annn`,
     ...currentHeaders,
     "Access-Control-Allow-Origin":
       config.request.headers?.Origin ||
       imposter.defaultResponse.headers?.["Access-Control-Allow-Origin"] ||
       "localhost",
   };
+  return config.response;
 };
 
 export const stubs: StubCollection = {
