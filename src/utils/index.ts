@@ -58,19 +58,6 @@ const responseExtendBehavior = (
   identifier = ""
 ) => {
   if (response) {
-    let oldDecorator = "()=>{}";
-    let oldBehavior = { decorate: oldDecorator } as Behavior;
-    if (response._behaviors) {
-      oldBehavior = response._behaviors;
-      if (response._behaviors.decorate) {
-        oldDecorator = response._behaviors.decorate;
-      }
-    }
-
-    let newBehavior = { ...oldBehavior, ...behavior };
-    if (oldBehavior.wait) {
-      newBehavior.wait = oldBehavior.wait;
-    }
     let addIdentifier = (config: ConfigInjection) => {
       const headers = config.response.headers || {};
       config.response.headers = {
@@ -80,11 +67,10 @@ const responseExtendBehavior = (
     };
     let addId = identifier ? addIdentifier.toString().replace("####", identifier) : "()=>{}";
 
-    newBehavior.decorate = `(__c__)=>{
-       (${oldDecorator.toString()})(__c__);
-       (${addId.toString()})(__c__);
-       (${decorate.toString()})(__c__) }`;
-    response._behaviors = newBehavior;
+    if (!response.behaviors) {
+      response.behaviors = [];
+    }
+    response.behaviors = [behavior, { decorate: addId.toString() }, { decorate }, ...response.behaviors];
   }
 };
 
@@ -186,26 +172,11 @@ const responseInjectRunFunction = (responseObj: Response, config: Config) => {
   responseObj.inject = injectResponse;
 };
 
-const extendModuleBehavior = (stubsModule: StubsModule, config: Config, imposter: ImposterDefaults) => {
+const extendModuleBehavior = (stubsModule: StubsModule, config: Config) => {
   let refInject = { run: config.globalRun, inject: "()=>{}" };
   responseInjectRunFunction(refInject, config);
 
   const decorate = refInject.inject;
-  // ((config: ConfigInjection) => {
-  //   config.response.statusCode = config.response.statusCode || 200;
-  //   const headers = config.response.headers || {};
-  //   let a = Math.floor(Math.random() * 10);
-  //   let b = Math.floor(Math.random() * 10);
-  //   let c = Math.floor(Math.random() * 10);
-  //   const defaultHeaders: any = "#####";
-  //   config.response.headers = {
-  //     ...headers,
-  //     ...defaultHeaders,
-  //     _csrf: `${a}${b}${c}a001e-1c45-4c33-853f-643f9bbb0bad`,
-  //   };
-  // })
-  //   .toString()
-  //   .replace("'#####'", strHeaders);
 
   for (const name in stubsModule) {
     const packageStubs: StubCollection = stubsModule[name];

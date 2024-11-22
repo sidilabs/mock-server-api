@@ -6,7 +6,7 @@
         "is": {
           "body": { "test": 1 }
         },
-        "_behaviors": { "decorate": "(config) => {\\n  config.response.headers['X-Test'] = 'True';\\n}" }
+        "behaviors": [{ "decorate": "(config) => {\\n  config.response.headers['X-Test'] = 'True';\\n}" }]
       }
     ]
   }

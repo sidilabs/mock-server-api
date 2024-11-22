@@ -112,9 +112,11 @@ export const stubs: StubCollection = {
       responses: [
         {
           is: { statusCode: 200, body: { test: 1 } },
-          _behaviors: {
-            decorate: injectAllConfig.toString(),
-          },
+          behaviors: [
+            {
+              decorate: injectAllConfig.toString(),
+            },
+          ],
         },
       ],
     },

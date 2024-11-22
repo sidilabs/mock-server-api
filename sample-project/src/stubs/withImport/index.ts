@@ -22,9 +22,11 @@ export const stubs: StubCollection = {
     responses: [
       {
         run: "/withImport/fns.firstFn",
-        _behaviors: {
-          wait: 1000,
-        },
+        behaviors: [
+          {
+            wait: 1000,
+          },
+        ],
       },
       {
         run: "/withImport.innerFn",

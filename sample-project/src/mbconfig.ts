@@ -40,7 +40,7 @@ export const imposter: ImposterDefaults = {
   //infos used to the mocked api
   port: 8090,
   protocol: "http",
-  name: "project-sample",
+  name: "project- 0.6",
 
   //if there is some mistake with the request this will be default response configuration,
   defaultResponse: {

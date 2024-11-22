@@ -47,9 +47,9 @@ const loadApis = (mockConfig: MockConfig) => {
 };
 
 export const loadStubModules = (mockConfig: MockConfig) => {
-  const { config, imposter } = mockConfig;
+  const { config } = mockConfig;
   return {
-    ...extendModuleBehavior({ ...loadApis(mockConfig), ...loadStubs(mockConfig) }, config, imposter),
+    ...extendModuleBehavior({ ...loadApis(mockConfig), ...loadStubs(mockConfig) }, config),
   } as StubsModule;
 };
 

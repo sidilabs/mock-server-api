@@ -42,7 +42,7 @@ export const stubs: StubCollection = packageBaseURL(ADMIN, {
               "Set-Cookie": "APP_SESSION_ID=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT",
             },
           },
-          _behaviors: { decorate: onLogout.toString() },
+          behaviors: [{ decorate: onLogout.toString() }],
         },
       ],
     },
@@ -63,7 +63,7 @@ export const stubs: StubCollection = packageBaseURL(ADMIN, {
           is: {
             statusCode: 302,
           },
-          _behaviors: { decorate: onLogin.toString() },
+          behaviors: [{ decorate: onLogin.toString() }],
         },
       ],
     },
@@ -76,7 +76,7 @@ export const stubs: StubCollection = packageBaseURL(ADMIN, {
           is: {
             statusCode: 200,
           },
-          _behaviors: { wait: 3000 },
+          behaviors: [{ wait: 3000 }],
         },
       ],
     },

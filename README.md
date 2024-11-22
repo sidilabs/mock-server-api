@@ -105,9 +105,9 @@ On the sample-project there is this folder withImport with this `StubCollection`
     responses: [
       {
         run: "/withImport/fns.firstFn",
-        _behaviors: {
+        behaviors: [{
           wait: 1000,
-        },
+        }],
       },
       {
         run: "/withImport.innerFn",

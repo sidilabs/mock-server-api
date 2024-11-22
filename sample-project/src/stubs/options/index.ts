@@ -13,7 +13,9 @@ export const cors = (config: any) => {
     _csrf: `${a}${b}${c}a001e-1c45-4c33-853f-643f9bbb0bad`,
     ...currentHeaders,
     "Access-Control-Allow-Origin":
-      config.request.headers.Origin || imposter.defaultResponse.headers["Access-Control-Allow-Origin"],
+      config.request.headers?.Origin ||
+      imposter.defaultResponse.headers?.["Access-Control-Allow-Origin"] ||
+      "localhost",
   };
 };
 

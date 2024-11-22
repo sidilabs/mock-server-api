@@ -56,7 +56,7 @@ export type Response = {
     };
     body?: Primitive | Json;
   };
-  _behaviors?: Behavior;
+  behaviors?: Behavior[];
   inject?: FunctionString;
   run?: PathFunctionString;
 };
