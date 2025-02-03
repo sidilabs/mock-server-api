@@ -1,6 +1,6 @@
 {
   "name": "mock-server-api",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "private": false,
   "author": {
     "name": "Thyago Machado Cassimiro",
@@ -38,7 +38,9 @@
   },
   "overrides": {
     "mountebank": {
-      "ejs": "^3.1.7"
+      "ejs": "^3.1.7",
+      "express": "^4.19.0",
+      "jsonpath-plus": "10.2.0"
     },
     "nodemailer": "$nodemailer"
   },

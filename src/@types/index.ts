@@ -80,6 +80,26 @@ export type StubsModule = {
 
 export type ApiMethods = "LIST" | "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
+type Params = {
+  id?: string | number;
+  params: { [key: string]: string | number | boolean };
+  api: {
+    url: string;
+    db: any;
+    state: any;
+  };
+};
+
+export type CallbackMap = {
+  LIST?: (config: ConfigInjection, paramValues: Params, jsonResult: any) => any;
+  GET?: (config: ConfigInjection, paramValues: Params, jsonResult: any) => any;
+  POST?: (config: ConfigInjection, paramValues: Params, jsonResult: any) => any;
+  PUT?: (config: ConfigInjection, paramValues: Params) => any;
+  DELETE?: (config: ConfigInjection, paramValues: Params) => any;
+};
+
+export type KeysCallbackMap = keyof CallbackMap;
+
 export type ApiData<T> = {
   model?: string;
   state: string;
@@ -88,6 +108,7 @@ export type ApiData<T> = {
   data?: any[];
   dataPriority?: number;
   methods?: ApiMethods[];
+  callbacks?: CallbackMap;
   config?: T;
 };
 

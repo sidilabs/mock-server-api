@@ -1,4 +1,4 @@
-import { ApiData, ConfigInjection, StubCollection, StubsModule } from "../../@types";
+import { ApiData, CallbackMap, ConfigInjection, KeysCallbackMap, StubCollection, StubsModule } from "../../@types";
 
 export type FieldGenerator = {
   methods?: string[];
@@ -54,6 +54,19 @@ function parseParams(url: string, method: UrlParamsMethods, urlParams?: UrlParam
 }
 
 export function initStubs(name: string, configApi: ApiData<ConfigList>, db: string): StubsModule {
+  let callbacksResult: any = "";
+  if (configApi.callbacks && Object.keys(configApi.callbacks).length) {
+    const callbacks = configApi.callbacks || {};
+    callbacksResult = Object.keys(callbacks).reduce((result, callbackName: string) => {
+      const callbackFn = callbacks[callbackName as KeysCallbackMap]!;
+      result = {
+        ...result,
+        [callbackName]: callbackFn.toString(),
+      };
+      return result;
+    }, {});
+  }
+
   let jsonFields: any = "";
   if (configApi.config?.fields) {
     const fields = configApi.config?.fields || {};
@@ -85,6 +98,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
 
   let __FIELDS__: FieldGeneratorMap = {}; /*"to be overwrited when called fillData";*/
   let __QUERY__: QueryFilterMap;
+  const __CALLBACKS__: CallbackMap = {}; /*"to be overwritten when called fillData";*/
 
   const relation = {
     "###db###": db,
@@ -93,6 +107,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
     "###direct###": JSON.stringify(!!configApi.config?.direct),
     __FIELDS__: JSON.stringify(jsonFields),
     __QUERY__: JSON.stringify(queryFields),
+    __CALLBACKS__: JSON.stringify(callbacksResult),
   };
 
   function injectGet(config: ConfigInjection) {
@@ -128,6 +143,25 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
         const generator = fields[fieldName].callback;
         objResponse = { ...objResponse, [fieldName]: generator(objResponse, config) };
       });
+    }
+
+    const urlApi = "###api###";
+    const paramsArray: string[] = urlApi.split("/").filter((k) => /^:.*/.test(k));
+    const paramValues: any = {};
+    if (paramsArray?.length) {
+      const urlApiRegExp = new RegExp(urlApi.replace(/:[^\/#?]+/g, "([^\\/#?]+)"));
+      const resultRE = urlApiRegExp.exec(config.request.path);
+      const idsValues = resultRE?.length ? resultRE.slice(1, 1 + paramsArray.length) : [];
+      idsValues.forEach((idValue, index) => {
+        const param = paramsArray[index];
+        paramValues[param.replace(/^:/, "")] = idValue;
+      });
+    }
+    const api = { url: urlApi, db: config.state["###db###"], state };
+    const callbacks: CallbackMap = __CALLBACKS__;
+    if (callbacks.GET) {
+      const callbackFn = eval(`(${callbacks.GET})`);
+      return callbackFn(config, { id, params: paramValues, api }, objResponse);
     }
 
     return {
@@ -172,6 +206,25 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
       });
     }
 
+    const urlApi = "###api###";
+    const paramsArray: string[] = urlApi.split("/").filter((k) => /^:.*/.test(k));
+    const paramValues: any = {};
+    if (paramsArray?.length) {
+      const urlApiRegExp = new RegExp(urlApi.replace(/:[^\/#?]+/g, "([^\\/#?]+)"));
+      const resultRE = urlApiRegExp.exec(config.request.path);
+      const idsValues = resultRE?.length ? resultRE.slice(1, 1 + paramsArray.length) : [];
+      idsValues.forEach((idValue, index) => {
+        const param = paramsArray[index];
+        paramValues[param.replace(/^:/, "")] = idValue;
+      });
+    }
+    const api = { url: urlApi, db: config.state["###db###"], state };
+    const callbacks: CallbackMap = __CALLBACKS__;
+    if (callbacks.POST) {
+      const callbackFn = eval(`(${callbacks.POST})`);
+      return callbackFn(config, { params: paramValues, api }, result);
+    }
+
     state.data.push(result);
     return {
       headers: {
@@ -197,6 +250,25 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
     const state = config.state["###db###"]["###state###"];
 
     const id = config.request.path.replace(new RegExp("^###api###/".replace(/:[^\/#?]+/, "([^\\/#?]+)")), "");
+
+    const urlApi = "###api###";
+    const paramsArray: string[] = urlApi.split("/").filter((k) => /^:.*/.test(k));
+    const paramValues: any = {};
+    if (paramsArray?.length) {
+      const urlApiRegExp = new RegExp(urlApi.replace(/:[^\/#?]+/g, "([^\\/#?]+)"));
+      const resultRE = urlApiRegExp.exec(config.request.path);
+      const idsValues = resultRE?.length ? resultRE.slice(1, 1 + paramsArray.length) : [];
+      idsValues.forEach((idValue, i) => {
+        const param = paramsArray[i];
+        paramValues[param.replace(/^:/, "")] = idValue;
+      });
+    }
+    const api = { url: urlApi, db: config.state["###db###"], state };
+    const callbacks: CallbackMap = __CALLBACKS__;
+    if (callbacks.PUT) {
+      const callbackFn = eval(`(${callbacks.PUT})`);
+      return callbackFn(config, { id, params: paramValues, api });
+    }
 
     const index: number = state.data.findIndex((entity: any) => entity.id == id);
     let result: any;
@@ -245,8 +317,30 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
     } else if (!config.state["###db###"]["###state###"]) {
       config.state["###db###"]["###state###"] = stateDefinition["###state###"];
     }
-    const state = config.state["###db###"]["###state###"];
+
+    const urlApi = "###api###";
+    const paramsArray: string[] = urlApi.split("/").filter((k) => /^:.*/.test(k));
+    const paramValues: any = {};
+    if (paramsArray?.length) {
+      const urlApiRegExp = new RegExp(urlApi.replace(/:[^\/#?]+/g, "([^\\/#?]+)"));
+      const resultRE = urlApiRegExp.exec(config.request.path);
+      const idsValues = resultRE?.length ? resultRE.slice(1, 1 + paramsArray.length) : [];
+      idsValues.forEach((idValue, i) => {
+        const param = paramsArray[i];
+        paramValues[param.replace(/^:/, "")] = idValue;
+      });
+    }
+
     const id = config.request.path.replace(new RegExp("^###api###/".replace(/:[^\/#?]+/, "([^\\/#?]+)")), "");
+
+    const api = { url: urlApi, db: config.state["###db###"], state: config.state["###db###"]["###state###"] };
+    const callbacks: CallbackMap = __CALLBACKS__;
+    if (callbacks.DELETE) {
+      const callbackFn = eval(`(${callbacks.DELETE})`);
+      return callbackFn(config, { id, params: paramValues, api });
+    }
+
+    const state = config.state["###db###"]["###state###"];
     state.data = state.data.filter((entity: any) => entity.id != id);
 
     return {
@@ -395,6 +489,14 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
         let querysMap = querysAfter[priority];
         runQuerys(querysMap);
       });
+    }
+
+    const callbacks: CallbackMap = __CALLBACKS__;
+    if (callbacks.LIST) {
+      const state = config.state["###db###"]["###state###"];
+      const api = { url: urlApi, db: config.state["###db###"], state };
+      const callbackFn = eval(`(${callbacks.LIST})`);
+      return callbackFn(config, { params: paramValues, api }, list);
     }
 
     return {
