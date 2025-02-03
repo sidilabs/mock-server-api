@@ -353,6 +353,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
   }
 
   function injectList(config: ConfigInjection, injectState: any, logger: any, resolve: any, imposterState: any) {
+    const isDirect = JSON.parse("###direct###");
     const stateDefinition = {
       "###state###": {
         lastId: 0,
@@ -501,11 +502,18 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
 
     return {
       statusCode: 200,
-
-      body: {
-        list,
-        total: count,
+      headers: {
+        "Content-Type": "application/json",
+        ...(isDirect ? { "total-count": count } : {}),
       },
+      body: JSON.stringify(
+        isDirect
+          ? list
+          : {
+              data: list,
+              totalElements: count,
+            }
+      ),
     };
   }
 
