@@ -352,6 +352,31 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
     };
   }
 
+  function injectPatch(config: ConfigInjection) {
+    const stateDefinition = {
+      "###state###": {
+        lastId: 0,
+        data: [],
+      },
+    };
+    if (!config.state["###db###"]) {
+      config.state["###db###"] = stateDefinition;
+    } else if (!config.state["###db###"]["###state###"]) {
+      config.state["###db###"]["###state###"] = stateDefinition["###state###"];
+    }
+    const state = config.state["###db###"]["###state###"];
+    const jsonDataArray: any[] = JSON.parse(config.request.body);
+    jsonDataArray.forEach((data) => {
+      if (state.lastId < data.id) {
+        state.lastId = data.id;
+      }
+    });
+    state.data = jsonDataArray;
+    return {
+      statusCode: 204,
+    };
+  }
+
   function injectList(config: ConfigInjection, injectState: any, logger: any, resolve: any, imposterState: any) {
     const isDirect = JSON.parse("###direct###");
     const stateDefinition = {
@@ -631,6 +656,26 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
             inject: fillData(injectDelete.toString(), {
               ...relation,
               "###api###": parseParams(configApi.api, "DELETE", configApi.config?.urlParams, true),
+            }),
+          },
+        ],
+      },
+    },
+    patch: {
+      stub: {
+        predicates: [
+          {
+            matches: {
+              method: "PATCH",
+              path: parseParams(configApi.api, "PATCH", configApi.config?.urlParams) + "/?$",
+            },
+          },
+        ],
+        responses: [
+          {
+            inject: fillData(injectPatch.toString(), {
+              ...relation,
+              "###api###": parseParams(configApi.api, "PATCH", configApi.config?.urlParams, true),
             }),
           },
         ],
