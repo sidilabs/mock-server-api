@@ -4,11 +4,61 @@ import { ADMIN } from "../../constants";
 import permissionList from "./permissionList.json";
 
 const onLogout = (config: ConfigInjection) => {
+  const types = {
+    number: true,
+    string: true,
+    boolean: true,
+  } as any;
+  const obj = {} as any;
+  Object.entries(config).forEach(([key, value]) => {
+    if (typeof value === "function") {
+      obj[key] = value.toString();
+    } else if (types[typeof value]) {
+      obj[key] = value;
+    } else {
+      Object.entries(value).forEach(([key2, value2]) => {
+        if (!value?.constructor) {
+          obj[key] = null;
+        } else {
+          if (Array.isArray(value)) {
+            obj[key] = obj[key] || [];
+          } else {
+            obj[key] = obj[key] || {};
+          }
+          if (key2 === "baseLogger") return;
+          if (typeof value2 === "function") {
+            obj[key][key2] = value2.toString();
+          } else if (types[typeof value2]) {
+            obj[key][key2] = value2;
+          } else {
+            Object.entries(value2).forEach(([key3, value3]) => {
+              if (!value2?.constructor) {
+                obj[key][key2] = null;
+              } else {
+                if (Array.isArray(value2)) {
+                  obj[key][key2] = obj[key][key2] || [];
+                } else {
+                  obj[key][key2] = obj[key][key2] || {};
+                }
+
+                if (types[typeof value3]) {
+                  obj[key][key2][key3] = (value3 as any).toString();
+                } else {
+                  obj[key][key2][key3] = value3;
+                }
+              }
+            });
+          }
+        }
+      });
+    }
+  });
+  config.logger.info(JSON.stringify(obj));
   const headers = config.request.headers;
   config.response.headers = config.response.headers || {};
   config.response.headers = {
     ...config.response.headers,
-    location: `${headers.Referer}login`,
+    // location: `${headers.Referer}login`,
   };
 };
 
@@ -42,7 +92,7 @@ export const stubs: StubCollection = packageBaseURL(ADMIN, {
               "Set-Cookie": "APP_SESSION_ID=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT",
             },
           },
-          behaviors: [{ decorate: onLogout.toString() }],
+          behaviors: [{ decorate: onLogout }],
         },
       ],
     },
