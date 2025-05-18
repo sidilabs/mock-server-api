@@ -131,6 +131,31 @@ const packageBaseURL = (url: string, packageStubs: StubCollection) => {
   return packageStubs;
 };
 
+const functionRequire = (config: ConfigInjection) => {
+  const p = require("path") as typeof path;
+  const [runPath, ...fnInternalPath] = ("###PATH###" as string).split(".");
+  //const fnName = requirePath
+
+  const db = "###DB###";
+  const pathBase = "###BASE###";
+  const fnPath = p.join(pathBase, runPath);
+  // "/withImport/fns.firstFn",
+  if (!config.state["__requires"]) {
+    config.state["__requires"] = {};
+  }
+  if (!config.state["__requires"][db]) {
+    config.state["__requires"][db] = {};
+  }
+  config.state["__requires"][db][fnPath] = 1;
+
+  const allExports = require(fnPath);
+  let funObj = allExports;
+  fnInternalPath.forEach((subPath) => {
+    funObj = funObj[subPath];
+  });
+  return funObj(config);
+};
+
 export const injectRunFunction = (packageStubs: StubCollection, config: Config, dirName: string) => {
   for (let i in packageStubs) {
     const data = packageStubs[i];
@@ -147,38 +172,22 @@ const responseInjectRunFunction = (responseObj: Response, config: Config, fullPa
   if (typeof responseObj.inject === "function") {
     responseObj.run = fullPath + ".inject";
   }
-  if (!responseObj.run) return;
+  const r = functionRequire.toString().replace("###BASE###", config.stubsFolder.replace(/\\/g, "\\\\"));
+  if (responseObj.run) {
+    const injectFunction = r.replace("###PATH###", responseObj.run).replace("###DB###", config.memDB);
+    delete responseObj.run;
+    responseObj.inject = injectFunction;
+  }
 
-  const injectResponseRequire = (config: ConfigInjection) => {
-    const p = require("path") as typeof path;
-    const [runPath, ...fnInternalPath] = ("###PATH###" as string).split(".");
-    //const fnName = requirePath
-
-    const db = "###DB###";
-    const pathBase = "###BASE###";
-    const fnPath = p.join(pathBase, runPath);
-    // "/withImport/fns.firstFn",
-    if (!config.state["__requires"]) {
-      config.state["__requires"] = {};
-    }
-    if (!config.state["__requires"][db]) {
-      config.state["__requires"][db] = {};
-    }
-    config.state["__requires"][db][fnPath] = 1;
-
-    const allExports = require(fnPath);
-    let funObj = allExports;
-    fnInternalPath.forEach((subPath) => {
-      funObj = funObj[subPath];
+  if (responseObj.behaviors?.length) {
+    responseObj.behaviors?.forEach((item, index) => {
+      if (typeof item.decorate === "function") {
+        item.decorate = r
+          .replace("###PATH###", `${fullPath}.behaviors.${index}.decorate`)
+          .replace("###DB###", config.memDB);
+      }
     });
-    return funObj(config);
-  };
-
-  const r = injectResponseRequire.toString().replace("###BASE###", config.stubsFolder.replace(/\\/g, "\\\\"));
-  const injectResponse = r.replace("###PATH###", responseObj.run).replace("###DB###", config.memDB);
-
-  delete responseObj.run;
-  responseObj.inject = injectResponse;
+  }
 };
 
 const extendModuleBehavior = (stubsModule: StubsModule, config: Config) => {

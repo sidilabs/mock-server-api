@@ -48,7 +48,7 @@ export type Predicate = {
 
 export type Behavior = {
   wait?: number | FunctionString;
-  decorate?: FunctionString;
+  decorate?: InjectionFunctionOrString;
 };
 
 export type Response = {

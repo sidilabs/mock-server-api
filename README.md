@@ -94,7 +94,7 @@ There are some options for query filters they are:
 - `list-total/utils.ts` there are 2 functions that could be used to add query function: `sort` = used to sort the result list,  `offset` = used for pagination, a sample of use is on `/mocks/stubs/projects`
 
 
-# THE NEWEST SUPER COOL WAY TO CREATE RESPONSES:
+# CREATE RESPONSES FUNCTION PATH:
 
 On the sample-project there is this folder withImport with this `StubCollection`:
 
@@ -120,3 +120,33 @@ On the sample-project there is this folder withImport with this `StubCollection`
 The main point is to use an exported function inside the stub response, it will only need to pass the path to the function on the following format:
 `"/pathToFolder/InsideStubs/Location/FileName.functionExported"`
 
+
+# 0.9.0 - Direct function declaration
+
+Allow function declaration direct on injection response or behaviors decorator;
+
+A sample available on 
+`"/sample-project/src/stubs/auth/index.ts"`
+```
+const onLogout = (config: ConfigInjection) => { 
+  ...
+
+...
+logout: {
+    stub: {
+      predicates: [{ matches: { method: "GET", path: "/logout" } }],
+      responses: [
+        {
+          is: {
+            statusCode: 302,
+            headers: {
+              "Set-Cookie": "APP_SESSION_ID=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT",
+            },
+          },
+          behaviors: [{ decorate: onLogout }],
+        },
+      ],
+    },
+  },
+...
+```
