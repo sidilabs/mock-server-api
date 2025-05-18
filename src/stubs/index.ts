@@ -22,10 +22,10 @@ const loadStubs = (mockConfig: MockConfig) => {
     if (apiStubMock.baseUrl) {
       packages.push([
         dirName,
-        injectRunFunction(packageBaseURL(apiStubMock.baseUrl, apiStubMock.stubs), mockConfig.config),
+        injectRunFunction(packageBaseURL(apiStubMock.baseUrl, apiStubMock.stubs), mockConfig.config, dirName),
       ]);
     } else {
-      packages.push([dirName, injectRunFunction(apiStubMock.stubs, mockConfig.config)]);
+      packages.push([dirName, injectRunFunction(apiStubMock.stubs, mockConfig.config, dirName)]);
     }
   });
   return Object.fromEntries(packages);

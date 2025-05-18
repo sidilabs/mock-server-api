@@ -29,7 +29,15 @@ export const stubs: StubCollection = {
         ],
       },
       {
-        run: "/withImport.innerFn",
+        inject: (config) => {
+          config.logger.warn(JSON.stringify(data));
+
+          data.a = data.a + 1;
+          data.b = data.b + "b";
+          data.c = [...data.c, data.a];
+
+          return { body: config.request.path + ":INNER" };
+        },
       },
     ],
   },

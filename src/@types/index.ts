@@ -25,7 +25,10 @@ export type ConfigInjection = {
     baseLogger: string;
   };
 };
+export type InjectionFunction = (config: ConfigInjection) => void;
+
 export type PathFunctionString = string;
+export type InjectionFunctionOrString = string | InjectionFunction;
 export type FunctionString = string;
 export type RegExpString = string;
 export type HttpMethod = "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "DELETE" | "PATCH";
@@ -57,7 +60,7 @@ export type Response = {
     body?: Primitive | Json;
   };
   behaviors?: Behavior[];
-  inject?: FunctionString;
+  inject?: InjectionFunctionOrString;
   run?: PathFunctionString;
 };
 

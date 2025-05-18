@@ -442,6 +442,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
 
     let count = list.length;
 
+    //@ts-ignore  --- this __QUERY__ will be replaced after stringify
     let querys = __QUERY__;
 
     if (querys) {

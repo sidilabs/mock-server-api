@@ -81,11 +81,11 @@ const stubExtendBehavior = (stub: Stub, decorate: FunctionString, behavior: Beha
   }
 };
 
-export const stub = (d: StubData | Stub) => {
+export const stub = (d: StubData | Stub): [Stub, string] => {
   if ((d as StubData).stub) {
-    return (d as StubData).stub;
+    return [(d as StubData).stub, ".stub"];
   } else {
-    return d as Stub;
+    return [d as Stub, ""];
   }
 };
 
@@ -97,7 +97,7 @@ const packageExtendBehavior = (
 ) => {
   for (let pkgItem in packageStubs) {
     const data = packageStubs[pkgItem];
-    stubExtendBehavior(stub(data), decorate, behavior, pkgName && pkgName + ":" + pkgItem);
+    stubExtendBehavior(stub(data)[0], decorate, behavior, pkgName && pkgName + ":" + pkgItem);
   }
 };
 
@@ -123,37 +123,41 @@ const predicateBaseURL = (url: string, predicateObj: Predicate, n = 0) => {
 const packageBaseURL = (url: string, packageStubs: StubCollection) => {
   for (let i in packageStubs) {
     const data = packageStubs[i];
-    for (let r in stub(data).predicates) {
-      let predicate = stub(data).predicates[r];
+    for (let r in stub(data)[0].predicates) {
+      let predicate = stub(data)[0].predicates[r];
       predicateBaseURL(url, predicate);
     }
   }
   return packageStubs;
 };
 
-export const injectRunFunction = (packageStubs: StubCollection, config: Config) => {
+export const injectRunFunction = (packageStubs: StubCollection, config: Config, dirName: string) => {
   for (let i in packageStubs) {
     const data = packageStubs[i];
-    for (let r in stub(data).responses) {
-      let response = stub(data).responses[r];
-      responseInjectRunFunction(response, config);
+
+    for (let r in stub(data)[0].responses) {
+      let response = stub(data)[0].responses[r];
+      responseInjectRunFunction(response, config, `${dirName}.stubs.${i}${stub(data)[1]}.responses.${r}`);
     }
   }
   return packageStubs;
 };
 
-const responseInjectRunFunction = (responseObj: Response, config: Config) => {
+const responseInjectRunFunction = (responseObj: Response, config: Config, fullPath: string) => {
+  if (typeof responseObj.inject === "function") {
+    responseObj.run = fullPath + ".inject";
+  }
   if (!responseObj.run) return;
 
   const injectResponseRequire = (config: ConfigInjection) => {
     const p = require("path") as typeof path;
-    const runArr = ("###PATH###" as string).split(".");
-    const fnName = runArr[1];
+    const [runPath, ...fnInternalPath] = ("###PATH###" as string).split(".");
+    //const fnName = requirePath
 
     const db = "###DB###";
     const pathBase = "###BASE###";
-    const fnPath = p.join(pathBase, runArr[0]);
-
+    const fnPath = p.join(pathBase, runPath);
+    // "/withImport/fns.firstFn",
     if (!config.state["__requires"]) {
       config.state["__requires"] = {};
     }
@@ -162,8 +166,12 @@ const responseInjectRunFunction = (responseObj: Response, config: Config) => {
     }
     config.state["__requires"][db][fnPath] = 1;
 
-    const fileRun = require(fnPath);
-    return fileRun[fnName](config);
+    const allExports = require(fnPath);
+    let funObj = allExports;
+    fnInternalPath.forEach((subPath) => {
+      funObj = funObj[subPath];
+    });
+    return funObj(config);
   };
 
   const r = injectResponseRequire.toString().replace("###BASE###", config.stubsFolder.replace(/\\/g, "\\\\"));
@@ -175,7 +183,7 @@ const responseInjectRunFunction = (responseObj: Response, config: Config) => {
 
 const extendModuleBehavior = (stubsModule: StubsModule, config: Config) => {
   let refInject = { run: config.globalRun, inject: "()=>{}" };
-  responseInjectRunFunction(refInject, config);
+  responseInjectRunFunction(refInject, config, "");
 
   const decorate = refInject.inject;
 

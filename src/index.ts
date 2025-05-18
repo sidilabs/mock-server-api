@@ -74,7 +74,7 @@ const createStubs = async (mockConfig: MockConfig) => {
   for (const spNames in stubsModule) {
     const stubsCollection = stubsModule[spNames];
     for (const sNames in stubsCollection) {
-      const stubData = stub(stubsCollection[sNames]);
+      const stubData = stub(stubsCollection[sNames])[0];
       await saveStub(mockConfig, `${spNames}:${sNames}`, stubData);
     }
   }
