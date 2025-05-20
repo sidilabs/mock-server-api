@@ -157,3 +157,7 @@ logout: {
 - sample-project:
 - - clear cache when using import functions
 - - api list with selected return attribute 
+
+# 0.10.1
+
+Fix api list-total query

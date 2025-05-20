@@ -449,13 +449,12 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
 
     let count = list.length;
 
-    //@ts-ignore  --- this __QUERY__ will be replaced after stringify
     let querys = __QUERY__;
 
     if (querys) {
       querys = Object.keys(querys).reduce((acc, queryName) => {
         let queryFilter: QueryOption = querys[queryName][1];
-        return { ...acc, [queryName]: eval(`(${queryFilter})`) };
+        return { ...acc, [queryName]: [querys[queryName][0], eval(`(${queryFilter})`)] };
       }, {});
 
       function doFilter(_list: any[], objParam: string, value: any, filterType: string) {
