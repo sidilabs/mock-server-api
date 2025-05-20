@@ -8,5 +8,8 @@ export const apis: ApiCollection = {
       { id: 1, name: "test" },
       { id: 2, name: "second" },
     ],
+    config: {
+      result: "content",
+    },
   },
 };

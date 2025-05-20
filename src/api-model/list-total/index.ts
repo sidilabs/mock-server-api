@@ -29,6 +29,7 @@ export type ConfigList = {
   fields?: FieldGeneratorMap;
   query?: QueryFilterMap;
   urlParams?: UrlParamsMethodsMap;
+  result?: string;
 };
 
 function fillData(functionStr: string, relation: { [key: string]: string }) {
@@ -105,6 +106,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
     "###state###": `${configApi.state}`,
     "###api###": configApi.api,
     "###direct###": JSON.stringify(!!configApi.config?.direct),
+    "###result###": configApi.config?.result || "data",
     __FIELDS__: JSON.stringify(jsonFields),
     __QUERY__: JSON.stringify(queryFields),
     __CALLBACKS__: JSON.stringify(callbacksResult),
@@ -115,6 +117,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
       "###state###": {
         lastId: 0,
         data: [],
+        content: [],
       },
     };
 
@@ -178,6 +181,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
       "###state###": {
         lastId: 0,
         data: [],
+        content: [],
       },
     };
     if (!config.state["###db###"]) {
@@ -240,6 +244,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
       "###state###": {
         lastId: 0,
         data: [],
+        content: [],
       },
     };
     if (!config.state["###db###"]) {
@@ -310,6 +315,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
       "###state###": {
         lastId: 0,
         data: [],
+        content: [],
       },
     };
     if (!config.state["###db###"]) {
@@ -357,6 +363,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
       "###state###": {
         lastId: 0,
         data: [],
+        content: [],
       },
     };
     if (!config.state["###db###"]) {
@@ -382,7 +389,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
     const stateDefinition = {
       "###state###": {
         lastId: 0,
-        data: [],
+        ["###result###"]: [],
       },
     };
 
@@ -536,7 +543,7 @@ export function initStubs(name: string, configApi: ApiData<ConfigList>, db: stri
         isDirect
           ? list
           : {
-              data: list,
+              ["###result###"]: list,
               totalElements: count,
             }
       ),

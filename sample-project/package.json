@@ -10,6 +10,7 @@
     "build": "tsc",
     "premock": "tsc",
     "mock": "mock",
+    "postmock": "ts-node ./src/clear.ts",
     "mb": "mb --allowInjection"
   },
   "author": "",

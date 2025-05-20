@@ -150,3 +150,10 @@ logout: {
   },
 ...
 ```
+
+# 0.10.0
+
+- Add select attribute name to return list result from API
+- sample-project:
+- - clear cache when using import functions
+- - api list with selected return attribute 
