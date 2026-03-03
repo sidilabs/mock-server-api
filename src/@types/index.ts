@@ -11,7 +11,7 @@ export type ConfigInjection = {
   response: {
     statusCode?: number;
     headers?: { [key: string]: Basic };
-    body?: Basic | Json;
+    body?: Basic | Object;
   };
   state: { [key: string]: any };
   logger: {
@@ -33,8 +33,7 @@ export type FunctionString = string;
 export type RegExpString = string;
 export type HttpMethod = "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "DELETE" | "PATCH";
 
-export type Basic = string | number | boolean | null | undefined | Date | Basic[];
-export type Json = { [key: string]: Basic | Json } | Json[];
+export type Basic = string | number | boolean | undefined;
 
 export type PredicateDef = { method: HttpMethod; path?: string | RegExpString; query?: { [key: string]: string } };
 
@@ -57,7 +56,7 @@ export type Response = {
     headers?: {
       [key: string]: string | number | boolean;
     };
-    body?: Basic | Json;
+    body?: Basic | Object;
   };
   behaviors?: Behavior[];
   inject?: InjectionFunctionOrString;
