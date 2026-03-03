@@ -9,16 +9,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/sidilabs/mock-server-api.git"
+    "url": "git+https://github.com/sidilabs/mock-server-api.git"
   },
-  "license":"MIT",
+  "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "/dist"
   ],
   "bin": {
-    "mock": "./bin/mock"
+    "mock": "bin/mock"
   },
   "scripts": {
     "mb": "mb start --allowInjection",
