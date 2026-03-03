@@ -10,8 +10,8 @@ export type ConfigInjection = {
   };
   response: {
     statusCode?: number;
-    headers?: { [key: string]: Primitive };
-    body?: Primitive | Json;
+    headers?: { [key: string]: Basic };
+    body?: Basic | Json;
   };
   state: { [key: string]: any };
   logger: {
@@ -33,8 +33,8 @@ export type FunctionString = string;
 export type RegExpString = string;
 export type HttpMethod = "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "DELETE" | "PATCH";
 
-export type Primitive = string | number | boolean;
-export type Json = { [key: string]: Primitive | Primitive[] | Json | Json[] };
+export type Basic = string | number | boolean | null | undefined | Date | Basic[];
+export type Json = { [key: string]: Basic | Json } | Json[];
 
 export type PredicateDef = { method: HttpMethod; path?: string | RegExpString; query?: { [key: string]: string } };
 
@@ -57,7 +57,7 @@ export type Response = {
     headers?: {
       [key: string]: string | number | boolean;
     };
-    body?: Primitive | Json;
+    body?: Basic | Json;
   };
   behaviors?: Behavior[];
   inject?: InjectionFunctionOrString;
